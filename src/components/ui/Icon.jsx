@@ -41,6 +41,21 @@ import LinkedIn from '@mui/icons-material/LinkedIn';
 import GitHub from '@mui/icons-material/GitHub';
 import X from '@mui/icons-material/X';
 import MailOutlineRounded from '@mui/icons-material/MailOutlineRounded';
+import SvgIcon from '@mui/material/SvgIcon';
+import QuestionAnswerOutlined from '@mui/icons-material/QuestionAnswerOutlined';
+import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
+import DescriptionRounded from '@mui/icons-material/DescriptionRounded';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import PhoneInTalkOutlined from '@mui/icons-material/PhoneInTalkOutlined';
+
+/** Material has no Discord glyph, so the brand mark is drawn inline. */
+function DiscordIcon(props) {
+  return (
+    <SvgIcon viewBox="0 0 24 24" {...props}>
+      <path d="M19.27 5.33A16.5 16.5 0 0 0 15.2 4.1a.06.06 0 0 0-.07.03c-.18.32-.38.73-.52 1.05a15.3 15.3 0 0 0-4.6 0c-.14-.33-.35-.73-.53-1.05a.06.06 0 0 0-.07-.03A16.4 16.4 0 0 0 5.34 5.33a.06.06 0 0 0-.03.02C2.72 9.2 2.01 12.96 2.36 16.67a.07.07 0 0 0 .03.05 16.6 16.6 0 0 0 4.99 2.51.06.06 0 0 0 .07-.02c.39-.53.73-1.08 1.02-1.67a.06.06 0 0 0-.03-.09 11 11 0 0 1-1.56-.74.06.06 0 0 1 0-.11l.31-.24a.06.06 0 0 1 .06 0 11.83 11.83 0 0 0 10.03 0 .06.06 0 0 1 .07 0l.3.24a.06.06 0 0 1 0 .11c-.5.29-1.02.53-1.56.74a.06.06 0 0 0-.03.09c.3.58.64 1.14 1.02 1.67a.06.06 0 0 0 .07.02 16.55 16.55 0 0 0 5-2.51.06.06 0 0 0 .02-.05c.42-4.29-.7-8.02-2.96-11.32a.05.05 0 0 0-.02-.02ZM8.89 14.41c-.98 0-1.79-.9-1.79-2.01 0-1.1.79-2 1.8-2 1 0 1.81.91 1.79 2.01 0 1.1-.79 2-1.8 2Zm6.24 0c-.98 0-1.79-.9-1.79-2.01 0-1.1.79-2 1.79-2 1.01 0 1.81.91 1.8 2.01 0 1.1-.79 2-1.8 2Z" />
+    </SvgIcon>
+  );
+}
 
 /**
  * Single icon registry. Content files reference icons by semantic key, keeping
@@ -100,10 +115,16 @@ const registry = {
   verified: VerifiedRounded,
   contract: DescriptionOutlined,
   shield: ShieldOutlined,
+  faq: QuestionAnswerOutlined,
+  community: GroupsOutlined,
+  whitepaper: DescriptionRounded,
+  location: PlaceOutlined,
+  phone: PhoneInTalkOutlined,
 
   // Social
   x: X,
   telegram: Telegram,
+  discord: DiscordIcon,
   linkedin: LinkedIn,
   github: GitHub,
   email: MailOutlineRounded,

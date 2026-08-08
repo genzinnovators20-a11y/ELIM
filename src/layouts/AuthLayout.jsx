@@ -103,9 +103,8 @@ export default function AuthLayout({ eyebrow, title, subtitle, children, footer 
                 <Stack spacing={2}>
                   <Eyebrow>{eyebrow}</Eyebrow>
                   <Typography
-                    variant="h2"
+                    variant="h3"
                     component="h1"
-                    sx={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', letterSpacing: '-0.035em' }}
                   >
                     {title}
                   </Typography>

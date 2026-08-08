@@ -81,7 +81,6 @@ export default function EliteStakingBridge() {
               <Typography
                 variant="h2"
                 component="h2"
-                sx={{ fontSize: 'clamp(1.65rem, 3.4vw, 3rem)', lineHeight: 1.12, textWrap: 'balance' }}
               >
                 <GradientText fill="ice" component="span">
                   {stakingBridge.subtitle}

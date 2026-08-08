@@ -1,16 +1,19 @@
 /**
  * ══════════════════════════════════════════════════════════════════════════════
- *  CONTENT SOURCE OF TRUTH
+ *  CONTENT SOURCE OF TRUTH  —  website spec v2
  * ══════════════════════════════════════════════════════════════════════════════
  *  Every string below is transcribed verbatim from the official ELIM FORGE
  *  content document. Wording, punctuation (– vs —), capitalisation, British
- *  spellings ("collateralised", "channelled") and numbers are reproduced exactly
- *  as supplied.
+ *  spellings ("collateralised", "channelled", "Decentralised") and numbers are
+ *  reproduced exactly as supplied.
  *
  *  DO NOT rewrite, summarise, shorten, expand, correct or re-order this copy.
  *  Where the source document used colour to signal hierarchy, the emphasis is
  *  carried structurally (`label` / `body` pairs, `emphasis` flags) and expressed
  *  visually in the components — never by editing the words.
+ *
+ *  Blocks marked "retained from spec v1" are not present in v2 but are kept on
+ *  the page by explicit client instruction; their copy is likewise untouched.
  * ══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -18,8 +21,10 @@
 
 export const hero = {
   title: 'ELIM FORGE',
+  chain: 'BNB SMART CHAIN ECOSYSTEM',
   tagline: 'FORGED WITH BLOCKCHAIN – FORGED IN CODE. FUELLED BY BSC',
-  subtitle: 'ELIM COIN - The Next Era of Web3',
+  statement: 'Institutional Power. Decentralised Freedom.',
+  lede: 'A high-performance digital asset ecosystem engineered to provide secure access, scalable utility, and a connected Web3 economy.',
 };
 
 /* ────────────────────────  INTRODUCTION  ───────────────────────── */
@@ -162,7 +167,8 @@ export const industries = {
 /* ───────────────────────────  ECOSYSTEM  ───────────────────────── */
 
 export const ecosystem = {
-  title: 'ElimForge Ecosystem',
+  brandLine: 'ELIM FORGE',
+  title: 'One Ecosystem. Multiple Industries. Infinite Possibilities.',
   headline: 'Redefining Decentralized Commerce: Real-World Utility, Unified.',
   /**
    * Source line, reproduced exactly, split only on its own " / " delimiters so
@@ -197,18 +203,18 @@ export const ecosystem = {
       icon: 'escrow',
     },
   ],
-  outroTitle: 'ELIM FORGE',
-  outroLine: 'One Ecosystem. Multiple Industries. Infinite Possibilities.',
 };
 
 /* ────────────────────────────  ELIMCOIN  ───────────────────────── */
 
 export const elimcoin = {
-  header: 'HEADER',
   title: 'ELIMCOIN',
-  lede: 'The native utility asset powering the entire infrastructure is the ELIM Coin (ELM).',
-  ledeEmphasis: 'ELIM Coin (ELM)',
+  kicker: 'Empowering the Future of Decentralized Infrastructure',
   tagline: 'One Token. Endless Possibilities.',
+  lede: 'ELIM Coin (ELM) is the native utility asset architected to power our entire ecosystem, driving seamless transactions, robust security, and scalable utility across a unified decentralized network.',
+  ledeEmphasis: 'ELIM Coin (ELM)',
+  ctaPrimary: 'Get ELM Now',
+  ctaSecondary: 'Read Whitepaper',
   specsTitle: 'Token Specifications',
   specs: [
     { label: 'Token Name:', value: 'ELIM Coin' },
@@ -225,6 +231,8 @@ export const elimcoin = {
 
 export const allocation = {
   title: 'Distribution Strategy & Allocation Matrix',
+  heading: 'ELM Tokenomics & Strategic Allocation',
+  subheading: 'Transparent Distribution Built for Long-Term Value',
   columns: ['Allocation Category', 'Percentage', 'Token Volume'],
   rows: [
     { category: 'Staking Pool', percentage: '50%', value: 50, volume: '500,000,000 ELM', color: 'gold' },
@@ -237,41 +245,204 @@ export const allocation = {
   ],
 };
 
-export const valueDynamics = {
-  title: 'Value Dynamics & Milestones',
+export const keyPillars = {
+  title: 'Key Ecosystem Pillars',
   items: [
     {
-      label: 'Deflationary Burning',
-      separator: '—',
-      body: '40% of total supply systematically burned to drive long-term scarcity.',
-      icon: 'burn',
-      metric: '40%',
+      label: 'Unified Utility',
+      separator: '–',
+      body: 'One single asset fuelling every network protocol and service.',
+      icon: 'token',
+      accent: 'gold',
     },
     {
-      label: 'Smart Staking Framework:',
-      separator: '',
-      body: ' Generous rewards pools allow holders to lock assets, secure network validations, and receive compounding yield distributions.',
-      icon: 'staking',
-      metric: null,
+      label: 'Infinite Scale',
+      separator: '–',
+      body: 'Engineered to support limitless decentralized applications and micro-transactions.',
+      icon: 'evolution',
+      accent: 'blue',
     },
     {
-      label: '2027 Listing Target',
-      separator: '—',
-      body: 'Launching on major exchanges at a target price of $0.10.',
-      icon: 'listing',
-      metric: '$0.10',
-    },
-    {
-      label: '2030 Growth Vision',
-      separator: '—',
-      body: 'Long-term ecosystem growth target of $100.00.',
-      icon: 'growth',
-      metric: '$100.00',
+      label: 'Native Governance',
+      separator: '–',
+      body: 'Empowering holders to shape the future of the infrastructure actively.',
+      icon: 'governance',
+      accent: 'emerald',
     },
   ],
 };
 
-/* ──────────────────────  COMPLIANCE & SAFETY  ──────────────────── */
+/* ────────────────────────────  ROADMAP  ────────────────────────── */
+
+export const roadmap = {
+  title: 'Roadmap Timeline: Value Dynamics & Milestones - The Path to $100',
+  titleLead: 'Roadmap Timeline:',
+  titleMiddle: ' Value Dynamics & Milestones - ',
+  titleTarget: 'The Path to $100',
+  phases: [
+    {
+      id: 'phase-1',
+      phase: 'Phase 1:',
+      name: 'Infrastructure & Ecosystem Buildout (Q1 to Q3 – 2026)',
+      current: true,
+      items: [
+        { label: 'Core Architecture', separator: '—', body: 'Finalizing the ultra-fast transaction matching engine.' },
+        { label: 'Smart Contracts', separator: '—', body: 'Deploying the BEP-20 ELM Coin token contract on Binance Smart Chain.' },
+        { label: 'Security Audits', separator: '—', body: 'Conducting external penetration testing and code verification.' },
+      ],
+    },
+    {
+      id: 'phase-2',
+      phase: 'Phase 2:',
+      name: 'Integration & Partner Expansion (Q4 – 2026, Q1 to Q3 2027)',
+      current: false,
+      items: [
+        { label: 'Industry Pilots', separator: '—', body: 'Launching textile, retail, and tourism payment gateways.' },
+        {
+          label: 'Smart Staking Framework:',
+          separator: '',
+          body: 'Opening a 500-million ELM staking pool for early adopters. Generous reward pools allow holders to lock assets, secure network validation, and receive compounding yield distributions.',
+        },
+        { label: 'Premium Alliances', separator: '—', body: 'Onboarding corporate partners to anchor real-world asset utility.' },
+      ],
+    },
+    {
+      id: 'phase-3',
+      phase: 'Phase 3:',
+      name: 'Global Gateway & Listing (Q4 – 2027 Target)',
+      current: false,
+      items: [
+        { label: 'Public Launch', separator: '—', body: 'Debuting the ELIM Exchange platform worldwide.' },
+        { label: 'Exchange Listings', separator: '—', body: 'Listing the ELM Coin on premier global centralized exchanges.' },
+        { label: 'Launch Price', separator: '—', body: 'Target listing market price set at $0.10.' },
+      ],
+    },
+    {
+      id: 'phase-4',
+      phase: 'Phase 4:',
+      name: 'Full Deflation & Scale (2028 - 2030)',
+      current: false,
+      items: [
+        {
+          label: '40% Deflationary Token Burn:',
+          separator: '',
+          body: 'Executing periodic burn mechanisms to reduce supply permanently. Systematically burning 40% of the total supply drives long-term scarcity.',
+        },
+        { label: 'Commodities & Real Estate', separator: '—', body: 'Activating full-scale fractional real estate and gold integrations.' },
+        {
+          label: 'Ecosystem Maturity',
+          separator: '—',
+          body: 'Formulating a long-term vision for ecosystem growth and scaling network transaction volume toward a target of $100.00.',
+        },
+      ],
+    },
+  ],
+};
+
+/* ─────────────────────────  CLOSING CALL  ──────────────────────── */
+
+export const futureCta = {
+  title: 'The Future of Infrastructure is ELIM',
+  subtitle: 'The Foundation is Built. The Path to $100 is Set.',
+  body: 'ELIM Coin (ELM) is more than just a token—it is the engine of a borderless, decentralized economy. With a massive 40% deflationary burn driving scarcity, a 500M staking pool rewarding early adopters, and an ecosystem engineered for hyper-scale, the window to secure your position at the absolute baseline is closing.',
+  ctaPrimary: 'Acquire ELM Tokens',
+  ctaSecondary: 'Join the Community',
+};
+
+/* ──────────────────────────────  FAQ  ──────────────────────────── */
+
+export const faq = {
+  title: 'Frequently Asked Questions',
+  items: [
+    {
+      id: 'what-is-elm',
+      question: 'What is ELM?',
+      answer: 'The native utility asset powering the entire ELIM decentralized infrastructure.',
+    },
+    {
+      id: 'how-burn-works',
+      question: 'How does the burn work?',
+      answer: 'Exactly 40% of the total supply is systematically destroyed over time to maximize long-term scarcity.',
+    },
+    {
+      id: 'stake-immediately',
+      question: 'Can I stake immediately?',
+      answer: 'Yes, early adopters can access the 500M ELM pool right now for compounding yields.',
+    },
+  ],
+};
+
+/* ───────────────────────────  COMMUNITY  ───────────────────────── */
+
+export const community = {
+  title: 'Connect with Our Global Network',
+  body: 'Stay updated on upcoming exchange listings, validation milestones, and governance votes. Join a rapidly growing community of innovators, developers, and long-term holders.',
+  links: [
+    { label: 'Telegram', icon: 'telegram', href: '#', accent: 'blue' },
+    { label: 'X / Twitter', icon: 'x', href: '#', accent: 'steel' },
+    { label: 'Discord', icon: 'discord', href: '#', accent: 'iris' },
+    { label: 'LinkedIn', icon: 'linkedin', href: '#', accent: 'cyan' },
+  ],
+};
+
+/* ────────────────────  RISK DISCLOSURE & LEGAL  ────────────────── */
+
+export const riskDisclosure = {
+  title: 'Risk Disclosure & Legal Disclaimer',
+  body: 'Cryptocurrency trading and digital asset participation involve high financial risk and volatility. The targets specified within this document—including the $0.10 listing goal (2027) and the $100.00 vision target (2030)—are structural objectives driven by project milestones and strategic projections; they do not constitute explicit guarantees of future return or performance. Participants must perform their own comprehensive due diligence before engaging with the ELIM ecosystem.',
+};
+
+/* ───────────────────────  CORPORATE CONTACT  ────────────────────
+ * Transcribed verbatim from the official ELIM FORGE branding card.
+ * Same rule as everything above: do not reword, reformat or "tidy".
+ * ──────────────────────────────────────────────────────────────── */
+
+export const contact = {
+  rows: [
+    {
+      id: 'office',
+      icon: 'location',
+      label: 'REGISTERED OFFICE',
+      lines: ['Branch Road, Camp Ithier,', 'Central Flacq, Mauritius: 1406-06'],
+    },
+    {
+      id: 'mobile',
+      icon: 'phone',
+      label: 'MOBILE NO',
+      lines: ['+230 59188088'],
+      href: 'tel:+23059188088',
+    },
+    {
+      id: 'website',
+      icon: 'globe',
+      label: 'WEBSITE',
+      lines: ['www.elimforge.com'],
+      href: 'https://www.elimforge.com',
+    },
+  ],
+  coinCaption: 'ELIM COIN',
+  poweredLead: 'Powered by',
+  poweredBy: 'Big Block Technologies',
+};
+
+/* ────────────────────────────  FOOTER  ─────────────────────────── */
+
+export const footer = {
+  copyright: '© 2026 ELIMCOIN Network. All rights reserved.',
+  strapline: 'Built for decentralized scale. Powered by ELM.',
+  links: [
+    { label: 'Privacy Policy', href: '#' },
+    { label: 'Terms of Service', href: '#' },
+    { label: 'Technical Whitepaper', href: '#' },
+    { label: 'Contact Support', href: '#' },
+  ],
+};
+
+/* ══════════════════════════════════════════════════════════════════
+ *  RETAINED FROM SPEC v1
+ *  Not present in spec v2; kept on the page by explicit client
+ *  instruction. Copy is reproduced verbatim from the v1 document.
+ * ══════════════════════════════════════════════════════════════════ */
 
 export const compliance = {
   title: 'Compliance & Safety Section',
@@ -326,60 +497,6 @@ export const compliance = {
     },
   ],
 };
-
-/* ────────────────────────────  ROADMAP  ────────────────────────── */
-
-export const roadmap = {
-  title: 'Roadmap Timeline: The Path to $100',
-  phases: [
-    {
-      id: 'phase-1',
-      phase: 'Phase 1:',
-      name: 'Infrastructure & Ecosystem Buildout (Current)',
-      current: true,
-      items: [
-        { label: 'Core Architecture', separator: '—', body: 'Finalizing the ultra-fast transaction matching engine.' },
-        { label: 'Smart Contracts', separator: '—', body: 'Deploying the BEP-20 ELM Coin token contract on Binance Smart Chain.' },
-        { label: 'Security Audits', separator: '—', body: 'Conducting external penetration testing and code verification.' },
-      ],
-    },
-    {
-      id: 'phase-2',
-      phase: 'Phase 2:',
-      name: 'Integration & Partner Expansion',
-      current: false,
-      items: [
-        { label: 'Industry Pilots', separator: '—', body: 'Launching textile, retail, and tourism payment gateways.' },
-        { label: 'Smart Staking Pools', separator: '—', body: 'Opening the 500 million ELM staking pool to early adopters.' },
-        { label: 'Premium Alliances', separator: '—', body: 'Onboarding corporate partners to anchor real-world asset utility.' },
-      ],
-    },
-    {
-      id: 'phase-3',
-      phase: 'Phase 3:',
-      name: 'Global Gateway & Listing (2027 Target)',
-      current: false,
-      items: [
-        { label: 'Public Launch', separator: '—', body: 'Debuting the ELIM Exchange platform worldwide.' },
-        { label: 'Exchange Listings', separator: '—', body: 'Listing the ELM Coin on premier global centralized exchanges.' },
-        { label: 'Launch Price', separator: '—', body: 'Target listing market price set at $0.10.' },
-      ],
-    },
-    {
-      id: 'phase-4',
-      phase: 'Phase 4:',
-      name: 'Full Deflation & Scale (2028 - 2030)',
-      current: false,
-      items: [
-        { label: '40% Token Burn', separator: '—', body: 'Executing periodic token burning mechanisms to reduce supply permanently.' },
-        { label: 'Commodities & Real Estate', separator: '—', body: 'Activating full-scale fractional real estate and gold integrations.' },
-        { label: 'Ecosystem Maturity', separator: '—', body: 'Scaling network transaction volume toward the long-term target of $100.00.' },
-      ],
-    },
-  ],
-};
-
-/* ────────────────────────────  STAKING  ────────────────────────── */
 
 export const staking = {
   title: 'Smart Staking Rewards Visualizer',
@@ -498,11 +615,4 @@ export const rewardDistribution = {
       accent: 'emerald',
     },
   ],
-};
-
-/* ────────────────────  RISK DISCLOSURE & LEGAL  ────────────────── */
-
-export const riskDisclosure = {
-  title: 'Risk Disclosure & Legal Disclaimer',
-  body: 'Cryptocurrency trading and digital asset participation involve high financial risk and volatility. The targets specified within this document—including the $0.10 listing goal (2027) and the $100.00 vision target (2030)—are structural objectives driven by project milestones and strategic projections; they do not constitute explicit guarantees of future return or performance. Participants must perform their own comprehensive due diligence before engaging with the ELIM ecosystem.',
 };

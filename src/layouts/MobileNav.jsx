@@ -7,18 +7,36 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import ArrowOutwardRounded from '@mui/icons-material/ArrowOutwardRounded';
-import { NavLink, Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from '../components/brand/Logo';
+import { scrollToTarget, jumpToTop } from '../hooks/useSmoothScroll';
 import { primaryNav, authNav } from '../constants/nav';
 import { fontFamilies } from '../theme/typography';
 import { easings } from '../theme/tokens';
 
 const MotionBox = motion.create(Box);
 
-/** Full-height navigation sheet for tablet and mobile. */
-function MobileNav({ open, onClose }) {
-  const { pathname } = useLocation();
+/**
+ * Full-height navigation sheet for tablet and mobile.
+ *
+ * Anchors behave exactly as they do in the desktop bar: on the landing page the
+ * click is intercepted and scrolled; anywhere else the router navigates and the
+ * scroll manager lands the target once the page has mounted. The sheet closes
+ * first either way, so the scroll happens against the real layout.
+ */
+function MobileNav({ open, onClose, activeSection, onHome }) {
+  const handleActivate = (event, item) => {
+    onClose();
+    if (!onHome) return;
+    event.preventDefault();
+    window.history.replaceState(null, '', item.to);
+    // Let the drawer's closing transition start before scrolling.
+    window.requestAnimationFrame(() => {
+      if (item.id === 'home') jumpToTop({ smooth: true });
+      else scrollToTarget(`#${item.id}`);
+    });
+  };
 
   return (
     <Drawer
@@ -67,18 +85,19 @@ function MobileNav({ open, onClose }) {
         <Box component="nav" aria-label="Mobile" sx={{ flex: 1, px: 2.5, pt: 4, overflowY: 'auto' }}>
           <Stack spacing={0.5}>
             {primaryNav.map((item, i) => {
-              const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+              const active = activeSection === item.id;
               return (
                 <MotionBox
-                  key={item.to}
+                  key={item.id}
                   initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.06 + i * 0.06, duration: 0.6, ease: easings.luxe }}
                 >
                   <Box
-                    component={NavLink}
+                    component={RouterLink}
                     to={item.to}
-                    onClick={onClose}
+                    onClick={(event) => handleActivate(event, item)}
+                    aria-current={active ? 'true' : undefined}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',

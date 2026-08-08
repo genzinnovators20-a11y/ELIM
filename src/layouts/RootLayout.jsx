@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -17,10 +17,16 @@ import useSmoothScroll, { scrollToTarget, jumpToTop } from '../hooks/useSmoothSc
  */
 function ScrollManager() {
   const { pathname, hash } = useLocation();
+  const lastPathRef = useRef(null);
 
   useEffect(() => {
+    const changedRoute = lastPathRef.current !== pathname;
+    lastPathRef.current = pathname;
+
     if (!hash) {
-      jumpToTop();
+      // A hash being cleared without leaving the page (e.g. the back button
+      // stepping out of an anchor) should not yank the reader to the top.
+      if (changedRoute) jumpToTop();
       return undefined;
     }
 
@@ -55,7 +61,10 @@ function ScrollManager() {
       else if (el) scrollToTarget(selector, { duration: 0.9 });
     };
 
-    jumpToTop();
+    // Only reset when arriving from another route: on the landing page the
+    // anchor is already below us, and jumping to the top first would read as a
+    // flicker before the smooth scroll.
+    if (changedRoute) jumpToTop();
     frame = requestAnimationFrame(attempt);
 
     return () => {

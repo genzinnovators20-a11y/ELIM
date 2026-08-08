@@ -52,7 +52,16 @@ function SectionHeading({
           <Typography
             variant="subtitle1"
             component="p"
-            sx={{ mt: { xs: 2.5, md: 3 }, maxWidth: typeof maxWidth === 'number' ? maxWidth - 40 : maxWidth, ...ledeSx }}
+            sx={{
+              mt: { xs: 2.25, md: 2.75 },
+              /**
+               * Capped by reading measure rather than by the title's width: a
+               * lede that runs as wide as a 62px headline is 110 characters per
+               * line, and the eye loses the return sweep.
+               */
+              maxWidth: (t) => `min(${t.ef.layout.measure}, 100%)`,
+              ...ledeSx,
+            }}
           >
             {lede}
           </Typography>

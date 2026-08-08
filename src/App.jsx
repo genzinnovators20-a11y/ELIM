@@ -1,25 +1,36 @@
 import { lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import RootLayout from './layouts/RootLayout';
+import { legacyRedirects } from './constants/nav';
 
-// Route-level code splitting — the home page ships alone; every other route,
-// and the WebGL bundle it may pull in, arrives on demand.
+// Route-level code splitting. The landing page ships alone; the account routes,
+// the archived newsroom, and the WebGL bundle all arrive on demand.
 const Home = lazy(() => import('./pages/Home'));
-const ElimCoin = lazy(() => import('./pages/ElimCoin'));
-const Ecosystem = lazy(() => import('./pages/Ecosystem'));
 const News = lazy(() => import('./pages/News'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+/**
+ * Single landing page.
+ *
+ * ELIMCOIN, Ecosystem and Roadmap are sections of `/`, reached by anchor rather
+ * than by route. The former standalone URLs are kept as redirects so existing
+ * links and indexed results land on the right part of the page.
+ */
 export default function App() {
   return (
     <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<Home />} />
-        <Route path="elimcoin" element={<ElimCoin />} />
-        <Route path="ecosystem" element={<Ecosystem />} />
+
+        {legacyRedirects.map(({ from, to }) => (
+          <Route key={from} path={from.replace(/^\//, '')} element={<Navigate to={to} replace />} />
+        ))}
+
+        {/* Retained, but no longer part of the primary journey. */}
         <Route path="news" element={<News />} />
+
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
         <Route path="*" element={<NotFound />} />

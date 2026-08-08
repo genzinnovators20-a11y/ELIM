@@ -1,63 +1,50 @@
 import { memo } from 'react';
 import Box from '@mui/material/Box';
-import { Grid, Stack } from '@/components/ui/layout';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import Divider from '@mui/material/Divider';
-import { Link as RouterLink } from 'react-router-dom';
-import Logo from '../components/brand/Logo';
-import Icon from '../components/ui/Icon';
+import { Grid, Stack } from '@/components/ui/layout';
+import Reveal from '../components/ui/Reveal';
 import GradientText from '../components/ui/GradientText';
-import { footerLinks, socials } from '../constants/nav';
-import { hero, elimcoin } from '../constants/content';
+import NotchedRule from '../components/ui/NotchedRule';
+import BrandPlate from './footer/BrandPlate';
+import LinkColumn from './footer/LinkColumn';
+import SocialRail from './footer/SocialRail';
+import { footerLinks } from '../constants/nav';
+import { footer as footerContent } from '../constants/content';
 import { fontFamilies } from '../theme/typography';
 
-const year = new Date().getFullYear();
+/** Split around the brand token so it can carry the metallic fill, words intact. */
+const COPYRIGHT_BRAND = 'ELIMCOIN Network';
+const [copyrightBefore, copyrightAfter = ''] = footerContent.copyright.split(COPYRIGHT_BRAND);
 
-const LinkColumn = ({ title, links }) => (
-  <Stack spacing={1.75}>
-    <Typography variant="overline" sx={{ color: (t) => t.ef.text.disabled }}>
-      {title}
-    </Typography>
-    <Stack spacing={1.25} component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
-      {links.map((link) => (
-        <Box component="li" key={link.label}>
-          <Box
-            component={RouterLink}
-            to={link.to}
-            sx={{
-              display: 'inline-block',
-              fontSize: '0.9rem',
-              color: (t) => t.ef.text.tertiary,
-              transition: (t) => `color 300ms ease, transform 420ms ${t.ef.easings.css.luxe}`,
-              '&:hover': { color: 'text.primary', transform: 'translateX(3px)' },
-            }}
-          >
-            {link.label}
-          </Box>
-        </Box>
-      ))}
-    </Stack>
-  </Stack>
-);
+const COLUMNS = [
+  { id: 'explore', title: 'Explore', links: footerLinks.explore },
+  { id: 'resources', title: 'Resources', links: footerLinks.resources },
+  { id: 'account', title: 'Account', links: footerLinks.account },
+];
 
-/** Enterprise footer: brand block, sitemap, policies, contact and social rail. */
+/**
+ * The closing section of the site rather than a conventional footer: the ELIM
+ * FORGE corporate plate, then navigation, resources, the social rail and the
+ * legal line — each separated by the identity's gold rules.
+ */
 function Footer() {
   return (
     <Box
       component="footer"
       sx={{
         position: 'relative',
-        mt: { xs: 6, md: 10 },
-        pt: { xs: 7, md: 10 },
-        pb: 4,
+        isolation: 'isolate',
+        mt: { xs: 8, md: 14 },
+        pt: { xs: '64px', md: '104px' },
+        pb: { xs: '40px', md: '52px' },
         borderTop: (t) => `1px solid ${t.ef.borders.hairline}`,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(0,0,0,0.45) 100%)',
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.016) 0%, rgba(4,14,12,0.5) 34%, rgba(0,0,0,0.62) 100%)',
         backdropFilter: 'blur(10px)',
       }}
     >
-      {/* Gold hairline */}
+      {/* Gold hairline seam */}
       <Box
         aria-hidden
         sx={{
@@ -65,97 +52,99 @@ function Footer() {
           top: -1,
           left: 0,
           right: 0,
-          height: 1,
+          height: '1px',
           background: (t) => t.ef.gradients.goldLine,
           opacity: 0.6,
         }}
       />
+      {/* Emerald ground bloom, matching the plate */}
+      <Box
+        aria-hidden
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          pointerEvents: 'none',
+          background:
+            'radial-gradient(62% 46% at 22% 6%, rgba(31,185,138,0.09) 0%, transparent 70%), radial-gradient(48% 40% at 88% 14%, rgba(212,175,55,0.08) 0%, transparent 72%)',
+        }}
+      />
 
       <Container>
-        <Grid container spacing={{ xs: 5, md: 4 }}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Stack spacing={2.5} sx={{ maxWidth: 340 }}>
-              <Logo size={44} showTag={false} />
-              <Typography
-                sx={{
-                  fontFamily: fontFamilies.mono,
-                  fontSize: '0.6875rem',
-                  letterSpacing: '0.16em',
-                  lineHeight: 1.9,
-                  color: (t) => t.ef.text.muted,
-                }}
-              >
-                {hero.tagline}
-              </Typography>
-              <Typography variant="body2" sx={{ color: (t) => t.ef.text.muted }}>
-                {elimcoin.tagline}
-              </Typography>
+        <Reveal variant="fadeUp" amount={0.12}>
+          <BrandPlate />
+        </Reveal>
 
-              <Stack direction="row" spacing={0.5} sx={{ pt: 0.5 }}>
-                {socials.map((social) => (
-                  <IconButton
-                    key={social.label}
-                    href={social.href}
-                    aria-label={social.label}
-                    size="small"
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      border: (t) => `1px solid ${t.ef.borders.hairline}`,
-                      borderRadius: 2,
-                      transition: (t) => `all 380ms ${t.ef.easings.css.luxe}`,
-                      '&:hover': {
-                        borderColor: (t) => t.ef.borders.gold,
-                        color: 'primary.light',
-                        transform: 'translateY(-2px)',
-                      },
-                    }}
-                  >
-                    <Icon name={social.icon} sx={{ fontSize: 16 }} />
-                  </IconButton>
-                ))}
-              </Stack>
-            </Stack>
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-            <LinkColumn title="Platform" links={footerLinks.platform} />
-          </Grid>
-          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-            <LinkColumn title="Resources" links={footerLinks.resources} />
-          </Grid>
-          <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <LinkColumn title="Account" links={footerLinks.account} />
-          </Grid>
+        <Grid container spacing={{ xs: 5, sm: 4, md: 5 }} sx={{ mt: { xs: 7, md: 10 } }}>
+          {COLUMNS.map((column) => (
+            <Grid key={column.id} size={{ xs: 6, sm: 4 }}>
+              <LinkColumn {...column} />
+            </Grid>
+          ))}
         </Grid>
 
-        <Divider sx={{ mt: { xs: 5, md: 7 }, mb: 3 }} />
+        <Box sx={{ mt: { xs: 6, md: 8 } }}>
+          <SocialRail />
+        </Box>
+
+        <Typography
+          component="p"
+          sx={{
+            mt: { xs: 6, md: 8 },
+            textAlign: 'center',
+            fontFamily: fontFamilies.serif,
+            fontSize: 'clamp(1.125rem, 2.6vw, 1.6rem)',
+            lineHeight: 1.4,
+            letterSpacing: '-0.01em',
+            textWrap: 'balance',
+          }}
+        >
+          <GradientText fill="gold" component="span">
+            {footerContent.strapline}
+          </GradientText>
+        </Typography>
+
+        <NotchedRule opacity={0.45} sx={{ mt: { xs: 4, md: 5 }, mb: { xs: 3, md: 3.5 } }} />
 
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
+          spacing={{ xs: 2, md: 3 }}
           alignItems={{ xs: 'flex-start', md: 'center' }}
           justifyContent="space-between"
         >
           <Typography variant="caption" sx={{ color: (t) => t.ef.text.disabled }}>
-            © {year} <GradientText component="span" sx={{ fontWeight: 600 }}>ELIM FORGE</GradientText>. All rights reserved.
+            {copyrightBefore}
+            <GradientText component="span" sx={{ fontWeight: 600 }}>
+              {COPYRIGHT_BRAND}
+            </GradientText>
+            {copyrightAfter}
           </Typography>
 
-          <Stack direction="row" spacing={{ xs: 2, sm: 3 }} flexWrap="wrap" useFlexGap>
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Contact'].map((item) => (
-              <Typography
-                key={item}
-                component="a"
-                href="#"
-                variant="caption"
-                sx={{
-                  color: (t) => t.ef.text.disabled,
-                  transition: 'color 280ms ease',
-                  '&:hover': { color: 'text.secondary' },
-                }}
-              >
-                {item}
-              </Typography>
+          <Stack
+            component="ul"
+            aria-label="Legal"
+            direction="row"
+            spacing={{ xs: 2, sm: 3 }}
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ listStyle: 'none', p: 0, m: 0 }}
+          >
+            {footerContent.links.map((item) => (
+              <Box component="li" key={item.label}>
+                <Typography
+                  component="a"
+                  href={item.href}
+                  variant="caption"
+                  sx={{
+                    color: (t) => t.ef.text.disabled,
+                    textDecoration: 'none',
+                    transition: 'color 280ms ease',
+                    '&:hover, &:focus-visible': { color: '#D9C173' },
+                  }}
+                >
+                  {item.label}
+                </Typography>
+              </Box>
             ))}
           </Stack>
         </Stack>

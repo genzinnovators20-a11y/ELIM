@@ -1,12 +1,20 @@
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import { useReducedMotion } from 'framer-motion';
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
+import { useLightingEnabled } from '../../hooks/usePointerLight';
 
 /**
  * Primary call to action with a subtle magnetic pull and a specular sweep that
- * crosses the surface on hover. Falls back to a plain button under
+ * crosses the surface on hover.
+ *
+ * The magnetism is written straight to the node's transform inside a single
+ * animation frame rather than through React state — a pointer moving across a
+ * button fires dozens of events per second, and re-rendering on each one made
+ * the cheapest element on the page the most expensive. Nothing here re-renders
+ * while the pointer moves.
+ *
+ * Falls back to a plain button on touch devices and under
  * `prefers-reduced-motion`.
  */
 function CTAButton({
@@ -20,21 +28,44 @@ function CTAButton({
   ...props
 }) {
   const ref = useRef(null);
-  const reduced = useReducedMotion();
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const frame = useRef(0);
+  const pending = useRef(null);
+  const enabled = useLightingEnabled();
+
+  const apply = useCallback(() => {
+    frame.current = 0;
+    const node = ref.current;
+    if (!node || !pending.current) return;
+    const { x, y } = pending.current;
+    node.style.transform = x === 0 && y === 0 ? '' : `translate3d(${x}px, ${y}px, 0)`;
+  }, []);
+
+  const schedule = useCallback(
+    (offset) => {
+      pending.current = offset;
+      if (!frame.current) frame.current = requestAnimationFrame(apply);
+    },
+    [apply],
+  );
 
   const handleMove = useCallback(
     (event) => {
-      if (!magnetic || reduced || !ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
-      setOffset({ x: x * 0.16, y: y * 0.22 });
+      const node = ref.current;
+      if (!magnetic || !node || !enabled) return;
+      const rect = node.getBoundingClientRect();
+      schedule({
+        x: (event.clientX - rect.left - rect.width / 2) * 0.16,
+        // The constant lift replaces the theme's `:hover` translate, which an
+        // inline transform would otherwise win against.
+        y: (event.clientY - rect.top - rect.height / 2) * 0.22 - 2,
+      });
     },
-    [magnetic, reduced],
+    [magnetic, schedule, enabled],
   );
 
-  const reset = useCallback(() => setOffset({ x: 0, y: 0 }), []);
+  const reset = useCallback(() => schedule({ x: 0, y: 0 }), [schedule]);
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   return (
     <Button
@@ -42,21 +73,11 @@ function CTAButton({
       variant={variant}
       color={color}
       size={size}
-      onMouseMove={handleMove}
-      onMouseLeave={reset}
+      onPointerMove={handleMove}
+      onPointerLeave={reset}
       onBlur={reset}
-      endIcon={
-        showArrow ? (
-          <ArrowForwardRounded
-            sx={{
-              fontSize: 18,
-              transition: (t) => `transform 520ms ${t.ef.easings.css.luxe}`,
-            }}
-          />
-        ) : null
-      }
+      endIcon={showArrow ? <ArrowForwardRounded sx={{ fontSize: 18 }} /> : null}
       sx={(theme) => ({
-        transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
         '& .MuiButton-endIcon': { transition: `transform 520ms ${theme.ef.easings.css.luxe}` },
         '&:hover .MuiButton-endIcon': { transform: 'translateX(4px)' },
         '&::after': {
@@ -69,7 +90,7 @@ function CTAButton({
           background:
             'linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.42) 50%, transparent 100%)',
           transform: 'skewX(-18deg)',
-          transition: `left 900ms ${theme.ef.easings.css.luxe}`,
+          transition: `left ${theme.ef.motion.sweep}`,
           pointerEvents: 'none',
         },
         '@media (hover: hover)': { '&:hover::after': { left: '160%' } },

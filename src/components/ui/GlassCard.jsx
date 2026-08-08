@@ -1,18 +1,27 @@
-import { forwardRef } from 'react';
+import { forwardRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import { alphaOf } from '../../utils/accents';
+import usePointerSpotlight, { useLightingEnabled } from '../../hooks/usePointerLight';
 
 /**
  * The signature surface: a graphite glass panel with a gradient hairline border,
  * an inner top highlight and an accent bloom that lifts on hover.
  * Border gradients are painted with a masked pseudo-element so the radius stays
  * perfectly round at every corner.
+ *
+ * Interactive cards also carry a **cursor spotlight**: a soft accent wash that
+ * follows the pointer across the surface, plus a matching bloom on the border
+ * itself so the edge catches the light where the cursor is. Both are driven by
+ * CSS custom properties written outside React (see `usePointerLight`), so
+ * tracking the pointer costs no re-renders — and both are inert on touch
+ * devices and under `prefers-reduced-motion`.
  */
 const GlassCard = forwardRef(function GlassCard(
   {
     children,
     accent = 'gold',
     interactive = true,
+    spotlight,
     padding = { xs: 3, md: 4 },
     radius = 20,
     intensity = 'default',
@@ -24,10 +33,25 @@ const GlassCard = forwardRef(function GlassCard(
   ref,
 ) {
   const strong = intensity === 'strong';
+  // Gated here as well as in the hook, so touch and reduced-motion clients do
+  // not carry a spotlight layer per card that can never light up.
+  const allowed = useLightingEnabled();
+  const lit = (spotlight ?? interactive) && allowed;
+  const spotRef = usePointerSpotlight({ enabled: lit });
+
+  /** The spotlight needs the node, and so may the caller. */
+  const setRefs = useCallback(
+    (node) => {
+      spotRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref, spotRef],
+  );
 
   return (
     <Box
-      ref={ref}
+      ref={setRefs}
       component={component}
       sx={(theme) => ({
         position: 'relative',
@@ -44,10 +68,11 @@ const GlassCard = forwardRef(function GlassCard(
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: theme.ef.shadows.card,
-        transition: `transform 620ms ${theme.ef.easings.css.luxe}, box-shadow 620ms ${theme.ef.easings.css.luxe}, background 480ms ease`,
+        transition: `transform ${theme.ef.motion.settle}, box-shadow ${theme.ef.motion.settle}, background 480ms ease`,
         willChange: interactive ? 'transform' : 'auto',
 
-        // Gradient hairline border
+        // Gradient hairline border. The accent stop brightens under the cursor
+        // via `--ef-spot-o`, so the edge picks up the light with the face.
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -80,6 +105,19 @@ const GlassCard = forwardRef(function GlassCard(
             }
           : undefined,
 
+        ...(lit && {
+          '& > .ef-spot': {
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            opacity: 'var(--ef-spot-o, 0)',
+            transition: 'opacity 480ms ease',
+            background: `radial-gradient(240px circle at var(--ef-spot-x, 50%) var(--ef-spot-y, 50%), ${alphaOf(accent, 0.14)} 0%, ${alphaOf(accent, 0.05)} 32%, transparent 62%)`,
+          },
+        }),
+
         ...(interactive && {
           '@media (hover: hover)': {
             '&:hover': {
@@ -88,6 +126,13 @@ const GlassCard = forwardRef(function GlassCard(
               boxShadow: `${theme.ef.shadows.lifted}, 0 30px 70px -40px ${alphaOf(accent, 0.5)}`,
             },
             '&:hover::after': { opacity: 1 },
+            // The bezelled icon rises with the card and catches more light,
+            // so the two read as one object rather than a badge on a panel.
+            '&:hover .ef-tile': {
+              transform: 'translateY(-2px)',
+              borderColor: alphaOf(accent, 0.44),
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -8px 18px -12px ${alphaOf(accent, 0.75)}, 0 10px 24px -16px ${alphaOf(accent, 0.6)}`,
+            },
           },
         }),
 
@@ -96,6 +141,7 @@ const GlassCard = forwardRef(function GlassCard(
       })}
       {...props}
     >
+      {lit && <Box className="ef-spot" aria-hidden />}
       {children}
     </Box>
   );

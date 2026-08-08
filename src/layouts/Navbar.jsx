@@ -1,24 +1,28 @@
-import { memo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import MenuRounded from '@mui/icons-material/MenuRounded';
-import { NavLink, Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import Logo from '../components/brand/Logo';
 import MobileNav from './MobileNav';
-import { primaryNav, authNav } from '../constants/nav';
+import useActiveSection from '../hooks/useActiveSection';
+import { scrollToTarget, jumpToTop } from '../hooks/useSmoothScroll';
+import { primaryNav, authNav, navSectionIds } from '../constants/nav';
 import { fontFamilies } from '../theme/typography';
 
 const MotionBox = motion.create(Box);
 
-function NavItem({ item, active }) {
+function NavItem({ item, active, onActivate }) {
   return (
     <Box
-      component={NavLink}
+      component={RouterLink}
       to={item.to}
+      onClick={(event) => onActivate(event, item)}
+      aria-current={active ? 'true' : undefined}
       sx={{
         position: 'relative',
         px: 1.75,
@@ -73,9 +77,13 @@ function NavItem({ item, active }) {
 }
 
 /**
- * Fixed navigation. Starts transparent over the hero and condenses into a
- * blurred graphite bar once the page moves — the standard institutional cue
- * that you have left the masthead.
+ * Fixed navigation for a single landing page.
+ *
+ * Every primary entry is an in-page anchor. Links stay real `<a href>` elements
+ * via RouterLink — so middle-click, copy-link and the browser's history all
+ * behave — while the click handler drives the smooth scroll directly, which also
+ * covers re-clicking the entry you are already on (no location change, so no
+ * router event would fire).
  */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -83,6 +91,9 @@ function Navbar() {
   const [lastPath, setLastPath] = useState(null);
   const { pathname } = useLocation();
   const { scrollY } = useScroll();
+
+  const onHome = pathname === '/';
+  const activeSection = useActiveSection(navSectionIds);
 
   useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 24));
 
@@ -93,6 +104,17 @@ function Navbar() {
     setLastPath(pathname);
     if (menuOpen) setMenuOpen(false);
   }
+
+  const handleActivate = useCallback(
+    (event, item) => {
+      if (!onHome) return; // let the router navigate, then ScrollManager lands it
+      event.preventDefault();
+      if (item.id === 'home') jumpToTop({ smooth: true });
+      else scrollToTarget(`#${item.id}`);
+      window.history.replaceState(null, '', item.to);
+    },
+    [onHome],
+  );
 
   return (
     <>
@@ -140,7 +162,7 @@ function Navbar() {
       >
         <Container sx={{ maxWidth: (t) => t.ef.layout.maxWidthWide }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-            <Logo size={38} />
+            <Logo size={38} onClick={onHome ? () => jumpToTop({ smooth: true }) : undefined} />
 
             <Box
               component="nav"
@@ -162,9 +184,10 @@ function Navbar() {
               >
                 {primaryNav.map((item) => (
                   <NavItem
-                    key={item.to}
+                    key={item.id}
                     item={item}
-                    active={item.to === '/' ? pathname === '/' : pathname.startsWith(item.to)}
+                    active={onHome && activeSection === item.id}
+                    onActivate={handleActivate}
                   />
                 ))}
               </Stack>
@@ -222,7 +245,12 @@ function Navbar() {
         </Container>
       </Box>
 
-      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileNav
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        activeSection={onHome ? activeSection : null}
+        onHome={onHome}
+      />
     </>
   );
 }

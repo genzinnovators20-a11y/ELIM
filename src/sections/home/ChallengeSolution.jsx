@@ -114,18 +114,9 @@ export default function ChallengeSolution() {
         <Stack spacing={{ xs: 1, md: 1.5 }} sx={{ textAlign: 'center', alignItems: 'center' }}>
           <Reveal variant="blur">
             <Typography
-              variant="h2"
+              variant="quote"
               component="p"
-              sx={{
-                fontFamily: fontFamilies.serif,
-                fontWeight: 400,
-                fontSize: 'clamp(1.6rem, 4.2vw, 3.5rem)',
-                lineHeight: 1.16,
-                letterSpacing: '-0.015em',
-                color: (t) => t.ef.text.secondary,
-                maxWidth: 1000,
-                textWrap: 'balance',
-              }}
+              sx={{ color: (t) => t.ef.text.secondary, maxWidth: 1000 }}
             >
               {bridgeStatement.lineOne}
             </Typography>
@@ -133,15 +124,8 @@ export default function ChallengeSolution() {
 
           <Reveal variant="blur" delay={0.14}>
             <Typography
-              variant="h2"
+              variant="quoteLg"
               component="p"
-              sx={{
-                fontFamily: fontFamilies.serif,
-                fontWeight: 400,
-                fontSize: 'clamp(1.9rem, 5vw, 4.2rem)',
-                lineHeight: 1.1,
-                letterSpacing: '-0.02em',
-              }}
             >
               <GradientText fill="gold" component="span">
                 {bridgeStatement.lineTwo}

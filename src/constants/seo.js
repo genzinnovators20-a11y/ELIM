@@ -5,27 +5,16 @@ export const OG_IMAGE = `${SITE_URL}/brand/og-image.png`;
 /** Per-route document metadata, applied by `useSeo`. */
 export const seo = {
   home: {
-    title: 'ELIM FORGE — Forge the Future of Digital Asset Trading',
+    title: 'ELIM FORGE — BNB Smart Chain Ecosystem | ELIM Coin (ELM)',
     description:
-      'Institutional power. Decentralized freedom. Ultra-fast execution, deep liquidity, and elite security — built for novice investors and global institutions alike.',
+      'Institutional Power. Decentralised Freedom. A high-performance digital asset ecosystem engineered to provide secure access, scalable utility, and a connected Web3 economy.',
     path: '/',
-  },
-  elimcoin: {
-    title: 'ELIMCOIN (ELM) — Token Specifications & Allocation | ELIM FORGE',
-    description:
-      'The native utility asset powering the entire infrastructure is the ELIM Coin (ELM). BEP-20 on Binance Smart Chain, 1 billion total supply, 18 decimals.',
-    path: '/elimcoin',
-  },
-  ecosystem: {
-    title: 'ElimForge Ecosystem — Real-World Utility, Unified | ELIM FORGE',
-    description:
-      'Redefining Decentralized Commerce: Real-World Utility, Unified. Asset tokenization, unified payments and decentralized escrow across gold, real estate, textiles, retail and tourism.',
-    path: '/ecosystem',
   },
   news: {
     title: 'Newsroom | ELIM FORGE',
     description: 'Announcements, protocol updates and ecosystem milestones from ELIM FORGE.',
     path: '/news',
+    noindex: true,
   },
   login: {
     title: 'Login | ELIM FORGE',

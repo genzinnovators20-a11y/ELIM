@@ -1,5 +1,5 @@
-import { colors, text, borders, radii, shadows, easings, gradients, surfaces, layout } from './tokens';
-import { fontFamilies } from './typography';
+import { colors, text, borders, radii, shadows, easings, gradients, surfaces, layout, motion } from './tokens';
+import { fontFamilies, variantMapping } from './typography';
 
 const focusRing = {
   outline: 'none',
@@ -15,6 +15,15 @@ export const components = {
         '--ef-emerald': colors.emerald,
         '--ef-blue': colors.blue,
         '--ef-obsidian': colors.obsidian,
+        /**
+         * Pointer position in viewport pixels, written once per frame by
+         * `CursorLight`. Consumers read the variables instead of subscribing to
+         * pointer events, so tracking the cursor costs one style write per
+         * frame no matter how many surfaces respond to it.
+         */
+        '--ef-cursor-x': '50vw',
+        '--ef-cursor-y': '50vh',
+        '--ef-cursor-opacity': '0',
         colorScheme: 'dark',
       },
       '@media (min-width: 900px)': {
@@ -51,6 +60,15 @@ export const components = {
       a: { color: 'inherit', textDecoration: 'none' },
       ':focus-visible': focusRing,
 
+      /**
+       * Typographic defaults for raw elements, so copy that is not wrapped in a
+       * `Typography` still gets balanced headings and even prose rag.
+       */
+      'h1, h2, h3, h4, h5, h6': { textWrap: 'balance' },
+      p: { textWrap: 'pretty' },
+      /** Long tokens — contract addresses, URLs — break instead of overflowing. */
+      'code, kbd, samp': { overflowWrap: 'anywhere' },
+
       // Refined scrollbar — Chromium + Firefox
       '*::-webkit-scrollbar': { width: 10, height: 10 },
       '*::-webkit-scrollbar-track': { background: colors.ink },
@@ -71,6 +89,27 @@ export const components = {
           transitionDuration: '0.001ms !important',
           scrollBehavior: 'auto !important',
         },
+      },
+    },
+  },
+
+  MuiTypography: {
+    defaultProps: {
+      variantMapping: {
+        // MUI's own defaults, kept so the custom entries below extend rather
+        // than replace the map.
+        h1: 'h1',
+        h2: 'h2',
+        h3: 'h3',
+        h4: 'h4',
+        h5: 'h5',
+        h6: 'h6',
+        subtitle1: 'h6',
+        subtitle2: 'h6',
+        body1: 'p',
+        body2: 'p',
+        inherit: 'p',
+        ...variantMapping,
       },
     },
   },
@@ -100,7 +139,7 @@ export const components = {
         fontWeight: 600,
         position: 'relative',
         overflow: 'hidden',
-        transition: `transform 320ms ${easings.css.luxe}, box-shadow 320ms ${easings.css.luxe}, background-color 260ms ease, border-color 260ms ease, color 260ms ease`,
+        transition: `transform 320ms ${easings.css.luxe}, box-shadow 320ms ${easings.css.luxe}, background-color ${motion.hover}, border-color ${motion.hover}, color ${motion.hover}`,
         willChange: 'transform',
         '&:hover': { transform: 'translateY(-2px)' },
         '&:active': { transform: 'translateY(0)' },

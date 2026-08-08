@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import { keyframes } from '@mui/material/styles';
 import GridField from './GridField';
 import NoiseOverlay from './NoiseOverlay';
+import CursorLight from './CursorLight';
 
 const drift = keyframes`
   0%   { transform: translate3d(0, 0, 0) scale(1); }
@@ -71,6 +72,10 @@ function BackgroundStage() {
             'radial-gradient(112% 82% at 50% 44%, transparent 42%, rgba(0,0,0,0.5) 82%, rgba(0,0,0,0.82) 100%)',
         }}
       />
+
+      {/* Sits above the vignette so the pointer light reads on the darkened
+          edges of the frame, not only in the middle. */}
+      <CursorLight />
 
       <NoiseOverlay opacity={0.042} />
     </Box>

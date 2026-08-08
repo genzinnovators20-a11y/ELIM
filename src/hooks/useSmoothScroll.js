@@ -41,10 +41,20 @@ export const scrollToTarget = (target, options = {}) => {
   }
 };
 
-/** Jump straight to the top with no animation — used on route changes. */
-export const jumpToTop = () => {
-  if (lenisInstance) lenisInstance.scrollTo(0, { immediate: true, force: true });
-  else window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+/**
+ * Send the page back to the top.
+ * Instant by default (route changes); `smooth` for the in-page HOME anchor.
+ */
+export const jumpToTop = ({ smooth = false } = {}) => {
+  if (typeof window === 'undefined') return;
+
+  if (lenisInstance) {
+    lenisInstance.resize();
+    if (smooth) lenisInstance.scrollTo(0, { duration: 1.2, force: true });
+    else lenisInstance.scrollTo(0, { immediate: true, force: true });
+    return;
+  }
+  window.scrollTo({ top: 0, left: 0, behavior: smooth ? 'smooth' : 'auto' });
 };
 
 /**

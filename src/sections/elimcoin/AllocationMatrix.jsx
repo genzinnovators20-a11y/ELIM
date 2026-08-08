@@ -27,8 +27,19 @@ export default function AllocationMatrix() {
   const current = active != null ? rows[active] : null;
 
   return (
-    <Section id="allocation" tone="gold">
-      <SectionHeading eyebrow="Supply Distribution" title={allocation.title} maxWidth={900} />
+    <Section id="tokenomics" tone="gold">
+      <SectionHeading
+        eyebrow={allocation.title}
+        title={allocation.heading}
+        lede={allocation.subheading}
+        maxWidth={900}
+        ledeSx={{
+          fontFamily: fontFamilies.serif,
+          fontSize: 'clamp(1.35rem, 2.6vw, 2.1rem)',
+          lineHeight: 1.22,
+          color: 'primary.light',
+        }}
+      />
 
       <Grid container spacing={{ xs: 5, lg: 7 }} alignItems="center" sx={{ mt: { xs: 3, md: 5 } }}>
         <Grid size={{ xs: 12, lg: 5 }}>

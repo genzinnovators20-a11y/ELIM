@@ -85,6 +85,51 @@ export const gradients = {
   hairlineTop: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent)',
 };
 
+/**
+ * Overlay opacity ramp. Every translucent white in the UI comes from here, so
+ * "one step brighter" is a decision the system makes once rather than a number
+ * invented per component.
+ */
+export const alpha = {
+  faint: 0.02,
+  subtle: 0.035,
+  soft: 0.055,
+  medium: 0.08,
+  strong: 0.12,
+  bold: 0.18,
+};
+
+const white = (a) => `rgba(255, 255, 255, ${a})`;
+
+/**
+ * Elevation ladder — surface, border and shadow always move together.
+ * A card that steps up in light also steps up in edge definition and cast
+ * shadow, which is what makes layering read as physical rather than painted.
+ */
+export const elevation = {
+  0: {
+    background: 'transparent',
+    border: 'transparent',
+    shadow: 'none',
+  },
+  1: {
+    background: `linear-gradient(158deg, ${white(alpha.subtle)} 0%, ${white(alpha.faint)} 52%, ${white(alpha.soft)} 100%)`,
+    border: white(0.07),
+    shadow: '0 1px 0 rgba(255,255,255,0.05) inset, 0 18px 44px -28px rgba(0,0,0,0.85)',
+  },
+  2: {
+    background: `linear-gradient(158deg, ${white(alpha.soft)} 0%, ${white(alpha.subtle)} 48%, ${white(alpha.medium)} 100%)`,
+    border: white(0.11),
+    shadow: '0 1px 0 rgba(255,255,255,0.08) inset, 0 30px 70px -34px rgba(0,0,0,0.92)',
+  },
+  3: {
+    background: `linear-gradient(158deg, ${white(alpha.medium)} 0%, ${white(alpha.soft)} 46%, ${white(alpha.strong)} 100%)`,
+    border: white(0.17),
+    shadow:
+      '0 1px 0 rgba(255,255,255,0.1) inset, 0 44px 100px -40px rgba(0,0,0,0.96), 0 0 0 1px rgba(255,255,255,0.04)',
+  },
+};
+
 export const radii = {
   xs: 6,
   sm: 10,
@@ -126,10 +171,24 @@ export const easings = {
 };
 
 export const durations = {
+  /** Pointer feedback — must land inside the ~100ms perception window. */
+  press: 0.12,
+  hover: 0.24,
   fast: 0.24,
   base: 0.5,
   slow: 0.9,
   cinematic: 1.4,
+};
+
+/**
+ * Interaction timings as CSS strings. Hover states resolve fast and settle
+ * slowly: the eye reads the response immediately, the surface keeps moving.
+ */
+export const motion = {
+  hover: `${durations.hover * 1000}ms ${easings.css.soft}`,
+  press: `${durations.press * 1000}ms ${easings.css.soft}`,
+  settle: `620ms ${easings.css.luxe}`,
+  sweep: `900ms ${easings.css.luxe}`,
 };
 
 export const layout = {
@@ -145,6 +204,15 @@ export const layout = {
   sectionYCompact: { xs: '52px', sm: '68px', md: '88px' },
   sectionYSpacious: { xs: '96px', sm: '128px', md: '168px', lg: '200px' },
   gutter: { xs: 20, sm: 28, md: 40, lg: 56 },
+
+  /**
+   * Reading measure. Long-form prose is capped in `ch` rather than `px` so the
+   * line length tracks the font size instead of drifting with the viewport —
+   * 66–72 characters is the band where continuous text stays comfortable.
+   */
+  measure: '68ch',
+  measureTight: '54ch',
+  measureWide: '76ch',
 };
 
 export const zIndex = {

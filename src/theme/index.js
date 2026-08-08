@@ -2,7 +2,24 @@ import { createTheme } from '@mui/material/styles';
 import { palette } from './palette';
 import { typography } from './typography';
 import { components } from './components';
-import { radii, shadows, easings, durations, gradients, borders, surfaces, colors, text, blur, layout, zIndex } from './tokens';
+import {
+  radii,
+  shadows,
+  easings,
+  durations,
+  motion,
+  gradients,
+  borders,
+  surfaces,
+  colors,
+  text,
+  blur,
+  layout,
+  zIndex,
+  alpha,
+  elevation,
+} from './tokens';
+import { tracking, leading } from './typography';
 
 /**
  * `responsiveFontSizes` is deliberately not applied: the type scale is already
@@ -30,8 +47,13 @@ export const theme = createTheme({
     shadows,
     easings,
     durations,
+    motion,
     layout,
     zIndex,
+    alpha,
+    elevation,
+    tracking,
+    leading,
   },
 });
 

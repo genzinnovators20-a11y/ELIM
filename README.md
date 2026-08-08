@@ -66,18 +66,109 @@ src/
 │  └─ visuals/     Forge rings, market pulse canvas, hero forge stage
 ├─ constants/      content.js (verbatim copy), nav.js, seo.js
 ├─ hooks/          useSeo, useSmoothScroll, useCountUp, useActiveSection…
-├─ layouts/        RootLayout, Navbar, MobileNav, Footer, AuthLayout
-├─ pages/          Home, ElimCoin, Ecosystem, News, Login, Signup, NotFound
-├─ sections/       Page sections grouped by area (home / elimcoin / ecosystem / staking)
+├─ layouts/        RootLayout, Navbar, MobileNav, AuthLayout
+│  └─ footer/      Footer + its brand plate, link columns and social rail
+├─ pages/          Home (the landing page), News, Login, Signup, NotFound
+├─ sections/       Landing-page sections grouped by area
+│                  (home / ecosystem / elimcoin / staking / shared)
 ├─ theme/          Design tokens, palette, typography, component overrides
 └─ utils/          Accent ramps
 ```
 
-**Routes** — `/` · `/elimcoin` · `/ecosystem` · `/news` · `/login` · `/signup`,
-matching the navigation defined in the source document. All non-home routes are
-code-split.
+### Single landing page
 
-### Two things worth knowing before editing
+Everything the navigation points at lives on `/`. ELIMCOIN, Ecosystem and
+Roadmap are **sections**, reached by anchor:
+
+| Nav item  | Target        |
+| --------- | ------------- |
+| HOME      | `#home`       |
+| ELIMCOIN  | `#elimcoin`   |
+| ECOSYSTEM | `#ecosystem`  |
+| ROADMAP   | `#roadmap`    |
+
+`src/pages/Home.jsx` composes the sections in the order of the source document;
+each section keeps its own module, so the page is a table of contents, not a
+monolith. The former standalone URLs (`/elimcoin`, `/ecosystem`, `/roadmap`)
+redirect into the matching anchor — see `legacyRedirects` in `constants/nav.js`.
+
+Remaining routes: `/login`, `/signup`, and `/news` (retained but no longer part
+of the primary journey).
+
+### The footer
+
+The footer is the closing section of the site rather than a utility strip. Its
+centrepiece, `layouts/footer/BrandPlate.jsx`, is a hand-built recreation of the
+ELIM FORGE corporate plate — **no image of that card is used anywhere**. The
+beveled double frame is two concentric masked gradient hairlines, the emerald
+ground and navy chevron are CSS gradients, the geometric lattice is three
+repeating gradients, the chevron cut is a `clip-path` polygon with its gold edge
+stroked by an overlaid SVG (`vectorEffect="non-scaling-stroke"`), the twin palm
+is a drawn vector (`components/brand/PalmMark.jsx`) and the coin is the site's
+existing ELIM COIN asset, held static.
+
+Below the plate: navigation, resources, account, the social rail, the strapline
+and the legal line. The registered office, mobile number and website come from
+`contact` in `constants/content.js` and are mirrored in the `Organization`
+structured data in `index.html` — change both together.
+
+Anchor scrolling is centralised: `scrollToTarget()` in `hooks/useSmoothScroll.js`
+resolves the destination and drives Lenis; `ScrollManager` in `RootLayout` handles
+deep links and cross-route hashes, waiting for the anchor to exist *and* settle
+before scrolling.
+
+### Design system
+
+Everything visual resolves from `theme/`. Components should reach for a token or
+a variant, not invent a value.
+
+**Type.** `theme/typography.js` owns the whole scale. Sizes are fluid `clamp()`,
+tracking tightens as type grows (`tracking.display` → `tracking.relaxed`), and
+leading opens as it shrinks. Beyond MUI's own variants there are:
+
+| Variant | Role |
+| --- | --- |
+| `display1` / `display2` | Hero and chapter openers |
+| `quoteLg` / `quote` / `quoteSm` | The serif statement voice, in its three real sizes |
+| `stat` / `statSm` | Figures — `tabular-nums`, so counters don't shiver |
+| `mono` | Addresses and technical data |
+
+Set type with `variant`, not with `sx={{ fontSize }}`. Headings carry
+`text-wrap: balance` and prose carries `text-wrap: pretty` by default, so ragged
+last lines and one-word orphans are handled by the system.
+
+Long-form copy is capped by **reading measure** (`layout.measure`, 68ch) rather
+than by pixel width — `SectionHeading` applies it to every lede automatically.
+
+**Surface.** `elevation[0..3]` moves background, border and shadow together; a
+card that steps up in light also steps up in edge definition. Translucent whites
+come from the `alpha` ramp.
+
+**Motion.** Durations and easings live in `durations` / `easings` / `motion`.
+Reveals travel 18px, not 30 — opacity carries the entrance and distance only
+supplies direction. Every variant has a reduced-motion branch.
+
+### Cursor lighting
+
+Two layers, one mechanism. `CursorLight` publishes the pointer position to
+`--ef-cursor-x/y` on the root element and paints a soft bloom that eases toward
+the cursor at ~14% per frame — the lag is what makes it read as light rather
+than as a cursor attachment. `usePointerSpotlight` does the same per surface,
+writing element-local `--ef-spot-x/y`, and `GlassCard` uses it to wash the face
+and brighten the border where the pointer is.
+
+Three rules hold this together, and any new lit surface must keep them:
+
+1. **Pointer events never touch React state.** Coordinates land in a ref and one
+   `requestAnimationFrame` writes CSS variables. Nothing re-renders while the
+   pointer moves.
+2. **The loop parks.** When the light catches up and the pointer stops, the
+   frame is released. Idle cost is zero.
+3. **It is opt-out at the source.** `lightingEnabled()` requires a fine pointer
+   and no `prefers-reduced-motion`. When it is false the spotlight layer is not
+   rendered at all, so touch and reduced-motion clients carry no dead DOM.
+
+### Three things worth knowing before editing
 
 1. **Material UI v9 removed system props from `Stack` and `Grid`.** `justifyContent`,
    `alignItems`, `flexWrap` and friends are silently dropped if passed as props to
@@ -85,6 +176,12 @@ code-split.
    those wrappers hoist the props into `sx`.
 2. **Spacing props multiply by 8.** `pt: 132` is 1056px, not 132px. Section rhythm
    values in `theme/tokens.js` are px strings for exactly this reason.
+3. **Sections retained from spec v1.** Compliance & Safety and the staking-protocol
+   chapter (Smart Staking Rewards Visualizer, Elite Staking Bridge, Hybrid Asset
+   Architecture, Algorithmic Forex Strategy, Reward Distribution) are not in spec v2
+   but are kept on the page by client instruction. Their copy is flagged as such in
+   `constants/content.js`; remove the corresponding lines from `pages/Home.jsx` to
+   drop them.
 
 ### Path alias
 
@@ -94,8 +191,9 @@ code-split.
 
 ## Performance
 
-- Route-level code splitting; the WebGL bundle is dynamically imported and only
-  on desktop, non-touch, non-reduced-motion clients, after the browser is idle.
+- The landing page is one route, so there is no cross-page hop; the WebGL bundle
+  is still dynamically imported, and only on desktop, non-touch, non-reduced-motion
+  clients, after the browser is idle. Account routes and the newsroom stay split out.
 - Deterministic vendor chunks (`vendor-react`, `vendor-mui`, `vendor-motion`,
   `vendor-three`) so long-lived assets stay cached across releases.
 - Self-hosted variable fonts (`@fontsource`) — no third-party font CDN, no
@@ -123,9 +221,9 @@ sudo certbot --nginx -d elimforge.com -d www.elimforge.com
 ```
 
 `deploy/nginx.conf` includes the **SPA fallback** (`try_files $uri /index.html`),
-which is required — without it, refreshing `/elimcoin` returns 404 — plus
-long-lived immutable caching for hashed assets and a `no-store` rule for
-`index.html`.
+which is required — without it, refreshing `/login` or hitting the legacy
+`/elimcoin` redirect returns 404 — plus long-lived immutable caching for hashed
+assets and a `no-store` rule for `index.html`.
 
 The build is fully static: any host that can serve a directory with an SPA
 fallback works (Nginx, Caddy, Apache, S3 + CloudFront).
@@ -138,8 +236,10 @@ Two places are intentionally UI-only and marked in the source:
 
 - `src/pages/Login.jsx` / `src/pages/Signup.jsx` — client-side validation is
   complete; the submit handler is where the auth service call goes.
-- `src/pages/News.jsx` — a designed empty state. Replace the placeholder panel
-  with the article list once a CMS or feed endpoint exists. No articles are
-  fabricated.
+- `src/pages/News.jsx` — a designed empty state, retained but unlinked from the
+  navigation. Replace the placeholder panel with the article list once a CMS or
+  feed endpoint exists. No articles are fabricated.
 
-Social links in `src/constants/nav.js` are placeholders (`#`) pending real URLs.
+Social links (`constants/nav.js` and the `community` block in `constants/content.js`),
+the **Read Whitepaper** buttons, and the footer policy links are placeholders (`#`)
+pending real URLs.

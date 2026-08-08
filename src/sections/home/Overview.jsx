@@ -6,7 +6,6 @@ import Reveal from '../../components/ui/Reveal';
 import Eyebrow from '../../components/ui/Eyebrow';
 import GradientText from '../../components/ui/GradientText';
 import { intro } from '../../constants/content';
-import { fontFamilies } from '../../theme/typography';
 
 /**
  * Positioning statement. The document's own section heading is preserved
@@ -25,11 +24,6 @@ export default function Overview() {
           <Typography
             variant="h2"
             component="h2"
-            sx={{
-              fontSize: 'clamp(1.9rem, 4.4vw, 4rem)',
-              lineHeight: 1.06,
-              textWrap: 'balance',
-            }}
           >
             <GradientText fill="gold" component="span">
               {intro.headingLead}
@@ -41,15 +35,9 @@ export default function Overview() {
         <Reveal variant="fadeUp" delay={0.12}>
           <Box>
             <Typography
+              variant="quoteSm"
               component="p"
-              sx={{
-                fontFamily: fontFamilies.serif,
-                fontSize: 'clamp(1.5rem, 2.8vw, 2.4rem)',
-                lineHeight: 1.22,
-                letterSpacing: '-0.012em',
-                color: 'text.primary',
-                mb: { xs: 2.5, md: 3 },
-              }}
+              sx={{ mb: { xs: 2.5, md: 3 } }}
             >
               {intro.subheading}
             </Typography>

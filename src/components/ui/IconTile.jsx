@@ -13,12 +13,15 @@ const sizes = {
  * Icon in a machined bezel — beveled edge, inner shadow and a faint accent wash.
  * Gives every icon the same physical weight regardless of glyph.
  */
-function IconTile({ name, accent = 'gold', size = 'md', sx, ...props }) {
+function IconTile({ name, accent = 'gold', size = 'md', className, sx, ...props }) {
   const s = sizes[size] ?? sizes.md;
 
   return (
     <Box
       aria-hidden
+      /* Tagged so an enclosing surface can respond on its behalf — the tile
+         reacts to the card being hovered, not only to the icon itself. */
+      className={['ef-tile', className].filter(Boolean).join(' ')}
       sx={{
         position: 'relative',
         width: s.box,

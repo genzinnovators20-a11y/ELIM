@@ -39,9 +39,8 @@ export default function News() {
 
           <Reveal variant="blur" delay={0.06}>
             <Typography
-              variant="h1"
+              variant="display2"
               component="h1"
-              sx={{ fontSize: 'clamp(2.5rem, 7vw, 5.5rem)', lineHeight: 1, letterSpacing: '-0.04em' }}
             >
               <GradientText fill="ice" component="span">
                 Latest from
@@ -103,7 +102,7 @@ export default function News() {
                   </CTAButton>
                   <CTAButton
                     component={RouterLink}
-                    to="/elimcoin"
+                    to="/#elimcoin"
                     variant="outlined"
                     magnetic={false}
                     showArrow={false}

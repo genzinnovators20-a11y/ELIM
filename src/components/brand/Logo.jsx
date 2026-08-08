@@ -6,12 +6,23 @@ import { Link as RouterLink } from 'react-router-dom';
 import ElimMark from './ElimMark';
 import { fontFamilies } from '../../theme/typography';
 
-/** Navigation / footer lockup: mark + wordmark + descriptor. */
-function Logo({ size = 40, showTag = true, to = '/', sx }) {
+/**
+ * Navigation / footer lockup: mark + wordmark + descriptor.
+ * `onClick` lets the navbar intercept the click on the landing page and scroll
+ * to the top instead of re-navigating to a route that is already active.
+ */
+function Logo({ size = 40, showTag = true, to = '/', onClick, sx }) {
+  const handleClick = (event) => {
+    if (!onClick) return;
+    event.preventDefault();
+    onClick(event);
+  };
+
   return (
     <Stack
       component={RouterLink}
       to={to}
+      onClick={handleClick}
       direction="row"
       spacing={1.5}
       alignItems="center"

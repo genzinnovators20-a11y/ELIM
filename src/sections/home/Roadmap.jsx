@@ -22,8 +22,11 @@ const phaseMeta = [
   { icon: 'burn', accent: 'emerald' },
 ];
 
-/** Split the document's title so the target value carries the metallic fill. */
-const [titleLead, titleTarget] = roadmap.title.split('The Path to ');
+/**
+ * The document's title is pre-split in the content file so the closing target
+ * can carry the metallic fill without the component parsing prose.
+ */
+const { titleLead, titleMiddle, titleTarget } = roadmap;
 
 /**
  * Roadmap. A single gold conductor runs the height of the section and fills as
@@ -45,13 +48,14 @@ export default function Roadmap() {
         eyebrow="Execution Timeline"
         title={
           <>
-            {titleLead}The Path to{' '}
+            {titleLead}
+            {titleMiddle}
             <GradientText fill="gold" component="span">
               {titleTarget}
             </GradientText>
           </>
         }
-        maxWidth={900}
+        maxWidth={980}
       />
 
       <Box ref={trackRef} sx={{ position: 'relative', mt: { xs: 6, md: 10 } }}>

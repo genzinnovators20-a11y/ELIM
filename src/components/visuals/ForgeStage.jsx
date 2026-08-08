@@ -11,17 +11,17 @@ import { fontFamilies } from '../../theme/typography';
 const MotionBox = motion.create(Box);
 
 /**
- * The hero's primary visual.
- *
- * Implements the two visual directions from the brief simultaneously: a dark
- * metallic panel carrying a live neon-green/blue trading chart, and the ELIM
- * FORGE emblem suspended at the centre of a laser assembly rig — featured at
- * full scale rather than tucked into a card.
+ * The ELIM FORGE image, mounted in a laser assembly rig and featured at full
+ * scale rather than tucked into a card.
  *
  * The whole rig tilts with the pointer on a spring, which is what sells the
  * depth; it is disabled entirely for reduced-motion and coarse pointers.
+ *
+ * `showMarketPanel` adds the dark metallic trading-chart mock-up. The spec
+ * assigns that mock-up to the ELIMCOIN section, so the masthead runs without
+ * it — but the composition is kept here, one prop away.
  */
-function ForgeStage() {
+function ForgeStage({ showMarketPanel = false }) {
   const wrapRef = useRef(null);
   const reduced = useReducedMotion();
 
@@ -106,6 +106,7 @@ function ForgeStage() {
         </MotionBox>
 
         {/* Metallic market panel */}
+        {showMarketPanel && (
         <MotionBox
           style={reduced ? undefined : { x: panelX }}
           initial={{ opacity: 0, y: 28 }}
@@ -173,6 +174,7 @@ function ForgeStage() {
 
           <MarketPulse height={148} />
         </MotionBox>
+        )}
 
         {/* Gold coin — the forged output, drifting free of the rig */}
         <MotionBox

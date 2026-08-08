@@ -40,9 +40,8 @@ export default function NotFound() {
 
         <Reveal variant="blur" delay={0.06}>
           <Typography
-            variant="h1"
+            variant="h2"
             component="h1"
-            sx={{ fontSize: 'clamp(2.25rem, 6vw, 4.5rem)', letterSpacing: '-0.04em' }}
           >
             <GradientText fill="ice" component="span">
               Page not found
@@ -61,7 +60,7 @@ export default function NotFound() {
             <CTAButton component={RouterLink} to="/">
               Back to Home
             </CTAButton>
-            <CTAButton component={RouterLink} to="/ecosystem" variant="outlined" magnetic={false} showArrow={false}>
+            <CTAButton component={RouterLink} to="/#ecosystem" variant="outlined" magnetic={false} showArrow={false}>
               Ecosystem
             </CTAButton>
           </Stack>
