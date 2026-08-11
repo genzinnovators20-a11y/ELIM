@@ -14,7 +14,7 @@ function LinkColumn({ id, title, links }) {
   const headingId = `footer-col-${id}`;
 
   return (
-    <Stack spacing={{ xs: 2, md: 2.5 }}>
+    <Stack spacing={{ xs: 1.5, md: 2.5 }}>
       <Box>
         <Typography
           id={headingId}
@@ -33,7 +33,7 @@ function LinkColumn({ id, title, links }) {
         <Box
           aria-hidden
           sx={{
-            mt: 1.25,
+            mt: 1,
             width: 26,
             height: '1px',
             background: 'linear-gradient(90deg, rgba(212,175,55,0.85), rgba(212,175,55,0))',
@@ -44,7 +44,7 @@ function LinkColumn({ id, title, links }) {
       <Stack
         component="ul"
         aria-labelledby={headingId}
-        spacing={1.5}
+        spacing={{ xs: 1.25, md: 1.5 }}
         sx={{ listStyle: 'none', p: 0, m: 0 }}
       >
         {links.map((link) => (

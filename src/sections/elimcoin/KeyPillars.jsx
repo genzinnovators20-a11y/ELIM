@@ -9,6 +9,7 @@ import Icon from '../../components/ui/Icon';
 import { keyPillars } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 /**
  * Key Ecosystem Pillars — three tall columns carrying an oversized ghost glyph
@@ -20,7 +21,7 @@ export default function KeyPillars() {
     <Section id="pillars" tone="sunken">
       <SectionHeading eyebrow="What ELM Stands On" title={keyPillars.title} maxWidth={820} />
 
-      <RevealGroup stagger={0.11} sx={{ mt: { xs: 5, md: 8 } }}>
+      <RevealGroup stagger={0.11} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2.5, md: 3 }}>
           {keyPillars.items.map((item, i) => (
             <Grid size={{ xs: 12, md: 4 }} key={item.label}>

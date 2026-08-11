@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import { ecosystem } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 const accents = ['gold', 'blue', 'cyan', 'emerald', 'iris'];
 
@@ -19,12 +20,13 @@ const accents = ['gold', 'blue', 'cyan', 'emerald', 'iris'];
  */
 export default function ValueMatrix() {
   return (
-    <Section id="matrix" tone="sunken">
+    /* First section of the Ecosystem chapter — flush to its opener. */
+    <Section id="matrix" tone="sunken" flush="top">
       <Reveal variant="fadeUpSm">
         <Eyebrow accent="cyan">Operating Model</Eyebrow>
       </Reveal>
 
-      <RevealGroup stagger={0.08} sx={{ mt: { xs: 3.5, md: 5 } }}>
+      <RevealGroup stagger={0.08} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2, md: 2.5 }}>
           {ecosystem.matrix.map((entry, i) => {
             const accent = accents[i % accents.length];

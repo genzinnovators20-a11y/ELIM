@@ -10,6 +10,7 @@ import Icon from '../../components/ui/Icon';
 import GradientText from '../../components/ui/GradientText';
 import { community } from '../../constants/content';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 /**
  * Connect with Our Global Network. Each channel is a full-surface card rather
@@ -61,7 +62,7 @@ export default function Community() {
         </Reveal>
       </Stack>
 
-      <RevealGroup stagger={0.09} sx={{ mt: { xs: 5, md: 7 } }}>
+      <RevealGroup stagger={0.09} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2, md: 2.5 }}>
           {community.links.map((link) => (
             <Grid size={{ xs: 6, md: 3 }} key={link.label}>

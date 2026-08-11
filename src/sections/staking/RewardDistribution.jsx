@@ -12,7 +12,7 @@ import ForgeRings from '../../components/visuals/ForgeRings';
 import { rewardDistribution } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
-import { easings } from '../../theme/tokens';
+import { easings, layout } from '../../theme/tokens';
 
 const MotionPath = motion.path;
 
@@ -100,7 +100,7 @@ export default function RewardDistribution() {
         <Typography
           component="p"
           sx={{
-            mt: { xs: 3, md: 4 },
+            mt: layout.stack.tight,
             maxWidth: 940,
             fontSize: { xs: '1.0625rem', md: '1.1875rem' },
             lineHeight: 1.8,
@@ -115,7 +115,7 @@ export default function RewardDistribution() {
 
       {/* Convergence node */}
       <Reveal variant="scale" delay={0.14}>
-        <Box sx={{ mt: { xs: 6, md: 9 }, display: 'grid', placeItems: 'center' }}>
+        <Box sx={{ mt: layout.stack.head, display: 'grid', placeItems: 'center' }}>
           <Box sx={{ position: 'relative', width: { xs: 168, md: 196 } }}>
             <Box sx={{ position: 'absolute', inset: '-34%' }}>
               <ForgeRings laserColor="rgba(212,175,55,0.85)" />
@@ -152,7 +152,7 @@ export default function RewardDistribution() {
 
       <FlowConnectors />
 
-      <RevealGroup stagger={0.12} sx={{ mt: { xs: 5, md: 0 } }}>
+      <RevealGroup stagger={0.12} sx={{ mt: { xs: layout.stack.head.xs, md: 0 } }}>
         <Grid container spacing={{ xs: 2.5, md: 3 }} alignItems="stretch">
           {rewardDistribution.items.map((item, i) => (
             <Grid size={{ xs: 12, md: 4 }} key={item.title}>

@@ -13,14 +13,16 @@ import { fontFamilies } from '../../theme/typography';
 function SocialRail() {
   return (
     <Stack
-      direction={{ xs: 'column', sm: 'row' }}
-      spacing={{ xs: 2.5, sm: 3 }}
-      alignItems={{ xs: 'flex-start', sm: 'center' }}
+      direction="row"
+      flexWrap="wrap"
+      useFlexGap
+      spacing={{ xs: 1.25, sm: 2 }}
+      alignItems="center"
       justifyContent="space-between"
       sx={{
-        px: { xs: 2.5, md: 3.5 },
-        py: { xs: 2.5, md: 2.75 },
-        borderRadius: '18px',
+        px: { xs: 2, md: 2.25 },
+        py: { xs: 1.75, md: 1.75 },
+        borderRadius: '14px',
         border: (t) => `1px solid ${t.ef.borders.hairline}`,
         background: 'linear-gradient(150deg, rgba(255,255,255,0.032) 0%, rgba(255,255,255,0.008) 100%)',
       }}
@@ -39,7 +41,7 @@ function SocialRail() {
         Follow ELIM FORGE
       </Typography>
 
-      <Stack direction="row" spacing={1.25} flexWrap="wrap" useFlexGap>
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         {socials.map((social) => (
           <Box
             key={social.label}
@@ -47,8 +49,8 @@ function SocialRail() {
             href={social.href}
             aria-label={social.label}
             sx={(t) => ({
-              width: 42,
-              height: 42,
+              width: 36,
+              height: 36,
               display: 'grid',
               placeItems: 'center',
               borderRadius: '50%',
@@ -64,7 +66,7 @@ function SocialRail() {
               },
             })}
           >
-            <Icon name={social.icon} sx={{ fontSize: 18 }} />
+            <Icon name={social.icon} sx={{ fontSize: 16 }} />
           </Box>
         ))}
       </Stack>

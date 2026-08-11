@@ -7,6 +7,7 @@ import CoinStage from '../../components/three/CoinStage';
 import MarketPulse from '../../components/visuals/MarketPulse';
 import GradientText from '../../components/ui/GradientText';
 import CTAButton from '../../components/ui/CTAButton';
+import Section from '../../components/ui/Section';
 import { scrollToTarget } from '../../hooks/useSmoothScroll';
 import { elimcoin } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
@@ -37,17 +38,12 @@ const [ledeBefore, ledeAfter = ''] = elimcoin.lede.split(elimcoin.ledeEmphasis);
  */
 export default function CoinIntro() {
   return (
-    <Box
-      component="section"
+    /* Chapter opener — see EcosystemIntro for how the handoff is composed. */
+    <Section
       id="elimcoin"
       aria-labelledby="elimcoin-title"
-      sx={{
-        position: 'relative',
-        pt: { xs: '76px', sm: '100px', md: '132px', lg: '160px' },
-        pb: { xs: '76px', sm: '100px', md: '120px' },
-        overflow: 'hidden',
-        scrollMarginTop: 'calc(var(--ef-nav-h) + 20px)',
-      }}
+      disableContainer
+      sx={{ overflow: 'hidden' }}
     >
       <Box
         aria-hidden
@@ -230,6 +226,6 @@ export default function CoinIntro() {
           </Grid>
         </Grid>
       </Container>
-    </Box>
+    </Section>
   );
 }

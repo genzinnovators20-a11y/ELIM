@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import { ecosystem } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 const accents = ['gold', 'emerald', 'blue'];
 
@@ -18,7 +19,7 @@ export default function CoreMechanics() {
     <Section id="mechanics" tone="sunken">
       <SectionHeading eyebrow="How It Works" accent="emerald" title={ecosystem.mechanicsTitle} maxWidth={820} />
 
-      <RevealGroup stagger={0.11} sx={{ mt: { xs: 5, md: 8 } }}>
+      <RevealGroup stagger={0.11} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2.5, md: 3 }}>
           {ecosystem.mechanics.map((item, i) => {
             const accent = accents[i] ?? 'gold';

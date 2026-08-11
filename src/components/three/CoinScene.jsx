@@ -6,14 +6,25 @@ import { useReducedMotion } from 'framer-motion';
 import createCoinFaceTexture from './coinTexture';
 import useAssetAvailability from '../../hooks/useAssetAvailability';
 
-const COIN_ARTWORK = '/brand/elimcoin-gold.png';
+const COIN_ARTWORK = '/brand/elimcoin-gold.svg';
+
+/**
+ * The supplied artwork's own box inside its 1600x1600 sheet, measured off the
+ * file's alpha channel — the same numbers the DOM coins are framed with.
+ *
+ * The sheet carries transparent padding, and the cylinder cap maps the whole
+ * texture square, so mapped raw the disc would land at 92.5% of the cap and
+ * leave a gap inside the milled rim. Framing the map onto that box is what
+ * makes the supplied disc fill the cap exactly as the painted face did.
+ */
+const ART_BOX = { u: 61 / 1600, v: 55 / 1600, w: 1480 / 1600, h: 1481 / 1600 };
 
 /**
  * The forged coin: a milled gold disc with engraved faces.
  *
- * The face uses the supplied brand artwork when it has been added to
- * /public/brand, and the procedurally painted face otherwise — so the real coin
- * appears in 3D the moment the PNG lands, with no code change.
+ * The face carries the official ELIM COIN artwork, framed onto the cap by
+ * `ART_BOX`; the procedurally painted face remains the fallback for as long as
+ * the file has not resolved.
  */
 function Coin({ reduced }) {
   const group = useRef(null);
@@ -24,6 +35,11 @@ function Coin({ reduced }) {
     const texture = new THREE.TextureLoader().load(COIN_ARTWORK);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 8;
+    /* Frame the disc onto the cap. Nothing else about the material, the
+       lighting or the geometry changes — this only moves the window over the
+       supplied sheet. */
+    texture.repeat.set(ART_BOX.w, ART_BOX.h);
+    texture.offset.set(ART_BOX.u, ART_BOX.v);
     return texture;
   }, [artworkReady]);
 

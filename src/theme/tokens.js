@@ -191,18 +191,60 @@ export const motion = {
   sweep: `900ms ${easings.css.luxe}`,
 };
 
+/**
+ * Vertical rhythm.
+ *
+ * The numbers below are *half-gaps*. Every section pads its top and its bottom
+ * from the same step, so two stacked sections compose exactly one gap rather
+ * than two — `pb` of the section above plus `pt` of the section below is the
+ * figure a designer actually reasons about, and it is the figure named in
+ * `rhythmGap`. Before this rule the two paddings were each a full gap and every
+ * boundary on the page silently rendered at double the intended distance.
+ *
+ * Expressed in px strings on purpose: these feed MUI's spacing-aware `pt`/`pb`
+ * props, where a bare number would be multiplied by the 8px spacing unit.
+ */
+const halves = (xs, sm, md, lg) => ({ xs: `${xs}px`, sm: `${sm}px`, md: `${md}px`, lg: `${lg}px` });
+
 export const layout = {
   navHeight: { xs: 64, md: 78 },
   maxWidth: 1320,
   maxWidthWide: 1560,
+
   /**
-   * Section rhythm, expressed in px strings on purpose: these feed MUI's
-   * spacing-aware `pt`/`pb` props, where a bare number would be multiplied by
-   * the 8px spacing unit.
+   * The composed section-to-section distance at each breakpoint, documented so
+   * the intent survives independently of the halved values below. Reference
+   * band for an editorial product site is roughly 96px on a phone to 176px on a
+   * large desktop; past that the eye stops carrying continuity across the seam.
    */
-  sectionY: { xs: '76px', sm: '100px', md: '132px', lg: '160px' },
-  sectionYCompact: { xs: '52px', sm: '68px', md: '88px' },
-  sectionYSpacious: { xs: '96px', sm: '128px', md: '168px', lg: '200px' },
+  rhythmGap: {
+    compact: { xs: 64, sm: 80, md: 96, lg: 112 },
+    default: { xs: 96, sm: 120, md: 152, lg: 176 },
+    spacious: { xs: 128, sm: 160, md: 200, lg: 232 },
+  },
+
+  sectionYCompact: halves(32, 40, 48, 56),
+  sectionY: halves(48, 60, 76, 88),
+  sectionYSpacious: halves(64, 80, 100, 116),
+
+  /**
+   * Intra-section rhythm — the three distances that recur inside every section.
+   * Previously each section invented its own: the heading-to-content gap alone
+   * appeared as 28, 32, 40, 48, 56, 64, 80 and 104px across nineteen sections,
+   * which is what made the page read as separately-built parts.
+   *
+   * Each step is comfortably smaller than `sectionY`, so the hierarchy the eye
+   * reads is always content < block < section.
+   */
+  stack: {
+    /** Heading block to the content it introduces. */
+    head: { xs: '40px', md: '56px' },
+    /** Peer content blocks inside one section. */
+    block: { xs: '32px', md: '44px' },
+    /** Closely-bound pair — statement to its supporting line, chart to caption. */
+    tight: { xs: '20px', md: '24px' },
+  },
+
   gutter: { xs: 20, sm: 28, md: 40, lg: 56 },
 
   /**

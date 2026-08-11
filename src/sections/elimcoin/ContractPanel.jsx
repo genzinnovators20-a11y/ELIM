@@ -27,7 +27,8 @@ const Rule = () => (
  */
 export default function ContractPanel() {
   return (
-    <Section id="contract" density="compact">
+    /* First section of the ELIMCOIN chapter — flush to its opener. */
+    <Section id="contract" density="compact" flush="top">
       <Reveal variant="fadeUp">
         <Stack spacing={{ xs: 3, md: 4 }}>
           <Rule />

@@ -12,6 +12,7 @@ import AnimatedNumber from '../../components/ui/AnimatedNumber';
 import { allocation, elimcoin } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 /**
  * Distribution Strategy & Allocation Matrix.
@@ -41,7 +42,7 @@ export default function AllocationMatrix() {
         }}
       />
 
-      <Grid container spacing={{ xs: 5, lg: 7 }} alignItems="center" sx={{ mt: { xs: 3, md: 5 } }}>
+      <Grid container spacing={{ xs: 5, lg: 7 }} alignItems="center" sx={{ mt: layout.stack.head }}>
         <Grid size={{ xs: 12, lg: 5 }}>
           <Reveal variant="scale">
             <DonutChart

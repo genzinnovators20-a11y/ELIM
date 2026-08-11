@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import GradientText from '../../components/ui/GradientText';
 import BrandArt from '../../components/brand/BrandArt';
 import ForgeRings from '../../components/visuals/ForgeRings';
+import Section from '../../components/ui/Section';
 import { ecosystem } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { easings } from '../../theme/tokens';
@@ -30,17 +31,19 @@ const rise = {
  */
 export default function EcosystemIntro() {
   return (
-    <Box
-      component="section"
+    /*
+      Chapter opener. It keeps its normal half-gap and the first section of the
+      chapter goes `flush="top"` instead, so the handoff resolves to exactly one
+      half-gap — half the distance between two unrelated sections. The title card
+      and its chapter therefore read as one unit, and the figure does not drift
+      with the density of whichever section happens to come next. Its own
+      container is kept so the wide glow layer can bleed past the gutter.
+    */
+    <Section
       id="ecosystem"
       aria-labelledby="ecosystem-title"
-      sx={{
-        position: 'relative',
-        pt: { xs: '76px', sm: '100px', md: '132px', lg: '160px' },
-        pb: { xs: 5, md: 7 },
-        overflow: 'hidden',
-        scrollMarginTop: 'calc(var(--ef-nav-h) + 20px)',
-      }}
+      disableContainer
+      sx={{ overflow: 'hidden' }}
     >
       <Box
         aria-hidden
@@ -125,6 +128,6 @@ export default function EcosystemIntro() {
           </MotionBox>
         </Stack>
       </Container>
-    </Box>
+    </Section>
   );
 }

@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import MarketPulse from '../../components/visuals/MarketPulse';
 import { forexStrategy } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
+import { layout } from '../../theme/tokens';
 
 /**
  * Algorithmic Forex Strategy & Alpha Generation.
@@ -28,7 +29,7 @@ export default function ForexStrategy() {
 
       <Box
         sx={{
-          mt: { xs: 5, md: 8 },
+          mt: layout.stack.head,
           borderRadius: { xs: '22px', md: '28px' },
           overflow: 'hidden',
           border: (t) => `1px solid ${t.ef.borders.hairline}`,

@@ -10,6 +10,7 @@ import { RevealGroup, RevealItem } from '../../components/ui/Reveal';
 import GlassCard from '../../components/ui/GlassCard';
 import { faq } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
+import { layout } from '../../theme/tokens';
 
 /**
  * Frequently Asked Questions.
@@ -25,7 +26,7 @@ export default function Faq() {
     <Section id="faq" tone="sunken">
       <SectionHeading eyebrow="Answers" title={faq.title} maxWidth={820} />
 
-      <RevealGroup stagger={0.09} sx={{ mt: { xs: 5, md: 7 }, maxWidth: 940 }}>
+      <RevealGroup stagger={0.09} sx={{ mt: layout.stack.head, maxWidth: 940 }}>
         <Stack spacing={2}>
           {faq.items.map((item) => {
             const open = openId === item.id;

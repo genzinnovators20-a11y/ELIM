@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import GradientText from '../../components/ui/GradientText';
 import { featuresGrid } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
+import { layout } from '../../theme/tokens';
 
 const groupAccent = { 'core-architecture': 'blue', 'token-utilities': 'gold' };
 
@@ -54,7 +55,7 @@ export default function FeaturesGrid() {
         maxWidth={920}
       />
 
-      <Stack spacing={{ xs: 6, md: 9 }} sx={{ mt: { xs: 6, md: 9 } }}>
+      <Stack spacing={layout.stack.head} sx={{ mt: layout.stack.head }}>
         {featuresGrid.groups.map((group) => {
           const accent = groupAccent[group.id] ?? 'gold';
           return (

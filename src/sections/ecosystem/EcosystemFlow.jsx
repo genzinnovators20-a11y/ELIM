@@ -13,7 +13,7 @@ import BrandArt from '../../components/brand/BrandArt';
 import { industries } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
-import { easings } from '../../theme/tokens';
+import { easings, layout } from '../../theme/tokens';
 
 const MotionPath = motion.path;
 
@@ -53,7 +53,7 @@ export default function EcosystemFlow() {
         <Box
           sx={{
             position: 'relative',
-            mt: { xs: 3, md: 3.5 },
+            mt: layout.stack.tight,
             aspectRatio: { xs: '1 / 1.16', sm: '1.6 / 1', md: '2.45 / 1' },
             maxWidth: 1120,
             mx: 'auto',

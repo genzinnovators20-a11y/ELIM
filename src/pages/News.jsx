@@ -15,6 +15,7 @@ import useSeo from '../hooks/useSeo';
 import { seo } from '../constants/seo';
 import { roadmap } from '../constants/content';
 import { fontFamilies } from '../theme/typography';
+import { layout } from '../theme/tokens';
 
 const currentPhase = roadmap.phases.find((phase) => phase.current);
 
@@ -31,7 +32,7 @@ export default function News() {
 
   return (
     <>
-      <Section density="compact" sx={{ pt: { xs: 6, md: 10 } }}>
+      <Section density="compact" sx={{ pt: layout.sectionY }}>
         <Stack spacing={{ xs: 3, md: 4 }} sx={{ maxWidth: 860 }}>
           <Reveal variant="fadeUpSm">
             <Eyebrow>Newsroom</Eyebrow>
@@ -53,7 +54,7 @@ export default function News() {
         </Stack>
       </Section>
 
-      <Section tone="contrast" sx={{ pt: 0 }}>
+      <Section tone="contrast" flush="top">
         <Reveal variant="fadeUp">
           <GlassCard accent="gold" radius={28} padding={0} interactive={false}>
             <Stack
@@ -117,7 +118,7 @@ export default function News() {
       </Section>
 
       {currentPhase && (
-        <Section density="compact" sx={{ pt: 0 }}>
+        <Section density="compact" flush="top">
           <Reveal variant="fadeUp">
             <GlassCard accent="blue" radius={24} padding={{ xs: 3, md: 4 }} interactive={false}>
               <Stack direction="row" spacing={2.5} alignItems="center" sx={{ mb: 3 }}>

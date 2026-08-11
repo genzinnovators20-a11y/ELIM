@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import { marketChallenge, solution, bridgeStatement } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 const Panel = ({ eyebrowIcon, accent, index, title, body, muted }) => (
   <GlassCard
@@ -87,7 +88,7 @@ export default function ChallengeSolution() {
       </Grid>
 
       {/* The gap, closing */}
-      <Box sx={{ mt: { xs: 8, md: 13 }, position: 'relative' }}>
+      <Box sx={{ mt: layout.stack.head, position: 'relative' }}>
         <Reveal variant="fade">
           <Box
             aria-hidden

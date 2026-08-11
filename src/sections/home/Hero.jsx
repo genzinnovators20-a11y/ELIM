@@ -16,14 +16,66 @@ import { easings } from '../../theme/tokens';
 const MotionBox = motion.create(Box);
 const MotionTypography = motion.create(Typography);
 
+/**
+ * Entrance choreography, in seconds.
+ *
+ * Grouped rather than evenly stepped: the masthead should resolve as three
+ * ideas — identity, message, action — not as nine items queueing up. An even
+ * `i * 0.1` stagger across nine elements left the specification strip still
+ * arriving at ~2.0s and the coin at ~2.2s, which spends the entire first
+ * impression on watching the page assemble itself.
+ *
+ * Everything is now settled by ~1.5s, leaving the rest of the opening seconds
+ * for the reader rather than for the animation.
+ */
+const CUE = {
+  headline: 0.05,
+  headlineStep: 0.075,
+  badge: 0.3,
+  tagline: 0.37,
+  rule: 0.44,
+  statement: 0.52,
+  lede: 0.6,
+  actions: 0.7,
+  specs: 0.78,
+  stage: 0.18,
+  coin: 0.72,
+  cue: 1.5,
+};
+
+/**
+ * Supporting elements: displacement only, no blur. Animating `filter` forces a
+ * repaint per frame, and on eight small elements it bought nothing the opacity
+ * ramp was not already doing.
+ */
 const rise = {
-  hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
-  visible: (i = 0) => ({
+  hidden: { opacity: 0, y: 16 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: easings.luxe, delay },
+  }),
+};
+
+/** The headline keeps its lens-resolving blur — one place, where it reads. */
+const riseHead = {
+  hidden: { opacity: 0, y: 24, filter: 'blur(8px)' },
+  visible: (delay = 0) => ({
     opacity: 1,
     y: 0,
     filter: 'blur(0px)',
-    transition: { duration: 1.05, ease: easings.luxe, delay: 0.12 + i * 0.1 },
+    transition: { duration: 0.95, ease: easings.luxe, delay },
   }),
+};
+
+/**
+ * Reduced motion: presence only. The site-wide CSS reset silences *CSS*
+ * transitions, but Framer drives these from JavaScript and would otherwise keep
+ * translating and blurring for a reader who has asked it not to.
+ */
+const still = {
+  hidden: { opacity: 0 },
+  visible: (delay = 0) => ({ opacity: 1, transition: { duration: 0.3, delay: Math.min(delay, 0.3) } }),
 };
 
 /** Fact strip — drawn straight from the published token specifications. */
@@ -37,6 +89,8 @@ const specStrip = [elimcoin.specs[2], elimcoin.specs[3], elimcoin.specs[4]];
 export default function Hero() {
   const reduced = useReducedMotion();
   const words = hero.title.split(' ');
+  const enter = reduced ? still : rise;
+  const enterHead = reduced ? still : riseHead;
 
   return (
     <Box
@@ -74,7 +128,15 @@ export default function Hero() {
       <Container sx={{ maxWidth: (t) => t.ef.layout.maxWidthWide, position: 'relative', zIndex: 1 }}>
         <Grid container spacing={{ xs: 6, lg: 4 }} alignItems="center">
           <Grid size={{ xs: 12, lg: 6.6 }}>
-            <Stack spacing={{ xs: 3, md: 3.5 }}>
+            {/*
+              Three groups, not nine evenly spaced items. Proximity is doing the
+              structural work: identity reads as one block, the message as
+              another, the call to action as a third. A uniform gap between all
+              nine gave the eye no grouping to hold on to.
+            */}
+            <Stack spacing={{ xs: 4.5, md: 5.5 }}>
+              {/* ── Identity ───────────────────────────────────────── */}
+              <Stack spacing={{ xs: 2.25, md: 2.75 }}>
               {/* ELIM FORGE */}
               <Box>
                 <Typography
@@ -94,8 +156,8 @@ export default function Hero() {
                     <MotionBox
                       key={word}
                       component="span"
-                      custom={i}
-                      variants={rise}
+                      custom={CUE.headline + i * CUE.headlineStep}
+                      variants={enterHead}
                       initial="hidden"
                       animate="visible"
                       sx={{ display: 'inline-block' }}
@@ -109,7 +171,7 @@ export default function Hero() {
               </Box>
 
               {/* BNB SMART CHAIN ECOSYSTEM */}
-              <MotionBox custom={2} variants={rise} initial="hidden" animate="visible">
+              <MotionBox custom={CUE.badge} variants={enter} initial="hidden" animate="visible">
                 <Stack
                   direction="row"
                   spacing={1.5}
@@ -120,8 +182,13 @@ export default function Hero() {
                     py: 0.9,
                     borderRadius: 999,
                     border: (t) => `1px solid ${t.ef.borders.goldSoft}`,
-                    background: 'rgba(212,175,55,0.055)',
+                    background:
+                      'linear-gradient(180deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.04) 100%)',
                     backdropFilter: 'blur(10px)',
+                    /* Inner top highlight — the glass catches light on its
+                       upper edge, which is what gives a pill any thickness. */
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255,246,216,0.18), 0 8px 22px -14px rgba(212,175,55,0.55)',
                   }}
                 >
                   <Box
@@ -150,8 +217,8 @@ export default function Hero() {
 
               {/* Tagline */}
               <MotionTypography
-                custom={3}
-                variants={rise}
+                custom={CUE.tagline}
+                variants={enter}
                 initial="hidden"
                 animate="visible"
                 component="p"
@@ -168,7 +235,7 @@ export default function Hero() {
                 {hero.tagline}
               </MotionTypography>
 
-              <MotionBox custom={4} variants={rise} initial="hidden" animate="visible">
+              <MotionBox custom={CUE.rule} variants={enter} initial="hidden" animate="visible">
                 <Box
                   aria-hidden
                   sx={{
@@ -180,11 +247,14 @@ export default function Hero() {
                   }}
                 />
               </MotionBox>
+              </Stack>
 
+              {/* ── Message ────────────────────────────────────────── */}
+              <Stack spacing={{ xs: 2.5, md: 3 }}>
               {/* Institutional Power. Decentralised Freedom. */}
               <MotionTypography
-                custom={5}
-                variants={rise}
+                custom={CUE.statement}
+                variants={enter}
                 initial="hidden"
                 animate="visible"
                 variant="quote"
@@ -195,24 +265,22 @@ export default function Hero() {
 
               {/* Positioning paragraph */}
               <MotionTypography
-                custom={6}
-                variants={rise}
+                custom={CUE.lede}
+                variants={enter}
                 initial="hidden"
                 animate="visible"
+                variant="subtitle1"
                 component="p"
-                sx={{
-                  fontSize: { xs: '1.0625rem', md: '1.25rem' },
-                  fontWeight: 500,
-                  lineHeight: 1.7,
-                  color: 'text.secondary',
-                  maxWidth: 640,
-                }}
+                sx={{ maxWidth: 640 }}
               >
                 {hero.lede}
               </MotionTypography>
+              </Stack>
 
+              {/* ── Action ─────────────────────────────────────────── */}
+              <Stack spacing={{ xs: 3, md: 3.5 }}>
               {/* Actions */}
-              <MotionBox custom={7} variants={rise} initial="hidden" animate="visible">
+              <MotionBox custom={CUE.actions} variants={enter} initial="hidden" animate="visible">
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.75} sx={{ pt: 1 }}>
                   <CTAButton onClick={() => scrollToTarget('#elimcoin')}>{elimcoin.ctaPrimary}</CTAButton>
                   <CTAButton variant="outlined" magnetic={false} showArrow={false} href="#">
@@ -222,7 +290,7 @@ export default function Hero() {
               </MotionBox>
 
               {/* Specification strip */}
-              <MotionBox custom={8} variants={rise} initial="hidden" animate="visible" sx={{ pt: { xs: 1, md: 2 } }}>
+              <MotionBox custom={CUE.specs} variants={enter} initial="hidden" animate="visible">
                 <Stack
                   direction="row"
                   divider={<Divider orientation="vertical" flexItem sx={{ opacity: 0.5 }} />}
@@ -242,6 +310,8 @@ export default function Hero() {
                           fontSize: { xs: '0.9rem', md: '1rem' },
                           color: 'text.primary',
                           letterSpacing: '-0.01em',
+                          /* Figures on a spec strip should align optically. */
+                          fontVariantNumeric: 'tabular-nums',
                         }}
                       >
                         {spec.value}
@@ -250,14 +320,15 @@ export default function Hero() {
                   ))}
                 </Stack>
               </MotionBox>
+              </Stack>
             </Stack>
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5.4 }}>
             <MotionBox
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.5, ease: easings.luxe, delay: 0.28 }}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94 }}
+              animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+              transition={{ duration: reduced ? 0.4 : 1.25, ease: easings.luxe, delay: reduced ? 0 : CUE.stage }}
               sx={{ px: { xs: 2, sm: 6, md: 10, lg: 0 } }}
             >
               <ForgeStage />
@@ -271,10 +342,10 @@ export default function Hero() {
         <MotionBox
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.8, duration: 1 }}
+          transition={{ delay: CUE.cue, duration: 0.9 }}
           sx={{
             position: 'absolute',
-            bottom: 26,
+            bottom: 18,
             left: '50%',
             transform: 'translateX(-50%)',
             display: { xs: 'none', lg: 'block' },
@@ -294,13 +365,24 @@ export default function Hero() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 1,
-              color: (t) => t.ef.text.disabled,
-              transition: 'color 300ms ease',
-              '&:hover': { color: 'text.secondary' },
+              justifyContent: 'center',
+              gap: 0.75,
+              /* 44×44 minimum hit area, without growing the visible mark. */
+              minWidth: 44,
+              minHeight: 44,
+              px: 1.5,
+              borderRadius: 2,
+              /*
+               * Was `text.disabled` at 9px — measured 2.80:1 against the
+               * obsidian ground, below the 4.5:1 floor. `text.tertiary` at 11px
+               * measures 5.47:1 and still reads as a quiet affordance.
+               */
+              color: (t) => t.ef.text.tertiary,
+              transition: (t) => `color ${t.ef.motion.hover}`,
+              '&:hover': { color: 'text.primary' },
             }}
           >
-            <Typography variant="overline" sx={{ fontSize: '0.5625rem' }}>
+            <Typography variant="overline" sx={{ fontSize: '0.6875rem', color: 'inherit' }}>
               Scroll
             </Typography>
             <MotionBox

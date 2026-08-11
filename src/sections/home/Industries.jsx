@@ -9,6 +9,7 @@ import Icon from '../../components/ui/Icon';
 import { industries } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 /**
  * Real-world utility industries — four tall pillars, each with its own accent
@@ -19,7 +20,7 @@ export default function Industries() {
     <Section id="industries" tone="sunken">
       <SectionHeading eyebrow="Where ELM Lands" title={industries.title} maxWidth={880} />
 
-      <RevealGroup stagger={0.1} sx={{ mt: { xs: 5, md: 8 } }}>
+      <RevealGroup stagger={0.1} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2.5, md: 3 }}>
           {industries.items.map((item, i) => (
             <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>

@@ -9,6 +9,7 @@ import IconTile from '../../components/ui/IconTile';
 import { compliance } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 const groupAccent = { security: 'emerald', regulatory: 'blue' };
 
@@ -27,7 +28,7 @@ export default function Compliance() {
         maxWidth={860}
       />
 
-      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mt: { xs: 5, md: 8 } }}>
+      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mt: layout.stack.head }}>
         {compliance.groups.map((group, gi) => {
           const accent = groupAccent[group.id] ?? 'emerald';
           return (

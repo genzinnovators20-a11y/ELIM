@@ -7,6 +7,7 @@ import { RevealGroup, RevealItem } from '../../components/ui/Reveal';
 import GlassCard from '../../components/ui/GlassCard';
 import { elimcoin } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
+import { layout } from '../../theme/tokens';
 
 /**
  * Token Specifications — a spec sheet, not a feature list. Mono labels,
@@ -17,7 +18,7 @@ export default function TokenSpecs() {
     <Section id="specifications" tone="sunken">
       <SectionHeading eyebrow="Datasheet" title={elimcoin.specsTitle} maxWidth={780} />
 
-      <RevealGroup stagger={0.08} sx={{ mt: { xs: 4, md: 6 } }}>
+      <RevealGroup stagger={0.08} sx={{ mt: layout.stack.head }}>
         <Grid container spacing={{ xs: 2, md: 2.5 }}>
           {elimcoin.specs.map((spec, i) => (
             <Grid size={{ xs: 12, sm: 6, lg: i < 3 ? 4 : 6 }} key={spec.label}>

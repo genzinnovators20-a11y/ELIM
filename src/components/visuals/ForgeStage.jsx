@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
@@ -37,11 +37,45 @@ function ForgeStage({ showMarketPanel = false }) {
   const emblemY = useTransform(sy1, [-0.5, 0.5], [-14, 14]);
   const panelX = useTransform(sx1, [-0.5, 0.5], [16, -16]);
   const glowX = useTransform(sx1, [-0.5, 0.5], [-36, 36]);
+  /**
+   * The coin travels further than the emblem it was struck from. Nearer objects
+   * displace more as the viewpoint shifts, so the wider range is what separates
+   * the two planes — the coin stops reading as decoration pinned to the rig and
+   * starts reading as an object floating in front of it.
+   */
+  const coinX = useTransform(sx1, [-0.5, 0.5], [-34, 34]);
+  const coinY = useTransform(sy1, [-0.5, 0.5], [-20, 20]);
+
+  /**
+   * The rect is measured on enter and on viewport change, not on every pointer
+   * event. `getBoundingClientRect()` inside a move handler forces a layout on
+   * each of the dozens of events a second a moving pointer produces.
+   */
+  const rectRef = useRef(null);
+
+  const measure = useCallback(() => {
+    if (wrapRef.current) rectRef.current = wrapRef.current.getBoundingClientRect();
+  }, []);
+
+  useEffect(() => {
+    if (reduced) return undefined;
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure);
+    };
+  }, [measure, reduced]);
+
+  const handleEnter = useCallback(() => {
+    if (!reduced) measure();
+  }, [measure, reduced]);
 
   const handleMove = useCallback(
     (event) => {
-      if (reduced || !wrapRef.current) return;
-      const rect = wrapRef.current.getBoundingClientRect();
+      if (reduced) return;
+      const rect = rectRef.current;
+      if (!rect) return;
       px.set((event.clientX - rect.left) / rect.width - 0.5);
       py.set((event.clientY - rect.top) / rect.height - 0.5);
     },
@@ -56,8 +90,9 @@ function ForgeStage({ showMarketPanel = false }) {
   return (
     <Box
       ref={wrapRef}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
+      onPointerEnter={handleEnter}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
       sx={{
         position: 'relative',
         width: '100%',
@@ -178,27 +213,84 @@ function ForgeStage({ showMarketPanel = false }) {
 
         {/* Gold coin — the forged output, drifting free of the rig */}
         <MotionBox
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={reduced ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1, y: [0, 14, 0] }}
-          transition={
-            reduced
-              ? { duration: 0.6 }
-              : {
-                  opacity: { delay: 1.1, duration: 0.9 },
-                  scale: { delay: 1.1, duration: 1.1, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1.1 },
-                }
-          }
+          style={reduced ? undefined : { x: coinX, y: coinY }}
           sx={{
             position: 'absolute',
             right: { xs: '-2%', md: '-4%' },
             top: { xs: '2%', md: '4%' },
             width: { xs: '26%', md: '25%' },
-            filter: 'drop-shadow(0 22px 40px rgba(0,0,0,0.7)) drop-shadow(0 0 32px rgba(212,175,55,0.3))',
             transform: 'translateZ(90px)',
           }}
         >
-          <BrandArt asset="coin" priority />
+          <MotionBox
+            initial={{ opacity: 0, scale: 0.78 }}
+            animate={reduced ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1, y: [0, 14, 0] }}
+            transition={
+              reduced
+                ? { duration: 0.5 }
+                : {
+                    opacity: { delay: 0.72, duration: 0.8 },
+                    scale: { delay: 0.72, duration: 1, ease: [0.16, 1, 0.3, 1] },
+                    y: { duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1.7 },
+                  }
+            }
+            sx={{
+              position: 'relative',
+              /**
+               * Three shadow layers rather than two: a tight contact shadow for
+               * near-field definition, the cast shadow for elevation, and the
+               * gold bloom for the metal's own light. Two layers read as a
+               * sticker with a glow; three read as an object above a surface.
+               */
+              filter:
+                'drop-shadow(0 5px 9px rgba(0,0,0,0.55)) drop-shadow(0 24px 42px rgba(0,0,0,0.7)) drop-shadow(0 0 34px rgba(212,175,55,0.32))',
+            }}
+          >
+            <BrandArt asset="coin" priority />
+
+            {/*
+              Specular sweep — a raking highlight crossing the struck face.
+              The disc mask lives on this wrapper, which shares the coin's box,
+              so the sheen is confined to the metal instead of streaking across
+              the background behind it.
+            */}
+            {!reduced && (
+              <Box
+                aria-hidden
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  clipPath: 'circle(47% at 50% 50%)',
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                }}
+              >
+                <MotionBox
+                  animate={{ x: ['-160%', '340%'], opacity: [0, 0.55, 0.55, 0] }}
+                  transition={{
+                    duration: 2.6,
+                    times: [0, 0.18, 0.72, 1],
+                    ease: 'easeInOut',
+                    repeat: Infinity,
+                    repeatDelay: 6.2,
+                    delay: 2.1,
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    top: '-14%',
+                    left: 0,
+                    width: '38%',
+                    height: '128%',
+                    background:
+                      'linear-gradient(100deg, transparent 0%, rgba(255,250,235,0.4) 46%, rgba(255,255,255,0.6) 52%, transparent 100%)',
+                    transform: 'skewX(-16deg)',
+                    filter: 'blur(5px)',
+                    mixBlendMode: 'screen',
+                  }}
+                />
+              </Box>
+            )}
+          </MotionBox>
         </MotionBox>
       </MotionBox>
     </Box>

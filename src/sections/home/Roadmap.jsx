@@ -12,6 +12,7 @@ import { motion, useScroll, useSpring, useReducedMotion } from 'framer-motion';
 import { roadmap } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 const MotionBox = motion.create(Box);
 
@@ -58,7 +59,7 @@ export default function Roadmap() {
         maxWidth={980}
       />
 
-      <Box ref={trackRef} sx={{ position: 'relative', mt: { xs: 6, md: 10 } }}>
+      <Box ref={trackRef} sx={{ position: 'relative', mt: layout.stack.head }}>
         {/* Conductor */}
         <Box
           aria-hidden

@@ -148,6 +148,14 @@ come from the `alpha` ramp.
 Reveals travel 18px, not 30 — opacity carries the entrance and distance only
 supplies direction. Every variant has a reduced-motion branch.
 
+**Hero choreography.** `sections/home/Hero.jsx` exports a `CUE` map holding the
+entrance timeline in seconds. It is grouped, not evenly stepped — identity,
+message, action — and the whole masthead is settled by **~1.5s**, with the coin
+landing at ~1.6s. Treat that as a budget: an even stagger across the nine
+elements pushed the last of them past 2s, which spends the entire first
+impression watching the page assemble itself. Blur is animated in one place, the
+headline, because animating `filter` repaints every frame.
+
 ### Cursor lighting
 
 Two layers, one mechanism. `CursorLight` publishes the pointer position to

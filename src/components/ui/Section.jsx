@@ -5,19 +5,45 @@ import { layout } from '../../theme/tokens';
 
 /**
  * Semantic section wrapper with the site's vertical rhythm.
+ *
  * `tone` selects one of the layered ground treatments so no two adjacent
  * sections read as the same flat surface.
+ *
+ * `density` picks a step on the rhythm ladder. The values it reads are
+ * half-gaps (see `layout` in the tokens): this section contributes half the
+ * distance to each of its neighbours and they contribute the other half, so a
+ * boundary lands on one gap rather than two stacked ones.
+ *
+ * `flush` drops the padding on one edge entirely, for the case the ladder
+ * cannot express: a chapter opener that must read as the same block as the
+ * section it introduces rather than as a sibling separated from it. Passing
+ * `flush="bottom"` is a composition decision — it says "these two are one
+ * unit" — and is the only sanctioned way to reach zero.
  */
+const DENSITIES = {
+  compact: layout.sectionYCompact,
+  default: layout.sectionY,
+  spacious: layout.sectionYSpacious,
+};
+
 const Section = forwardRef(function Section(
-  { children, id, tone = 'default', density = 'default', maxWidth, disableContainer = false, sx, containerSx, ...props },
+  {
+    children,
+    id,
+    tone = 'default',
+    density = 'default',
+    flush,
+    maxWidth,
+    disableContainer = false,
+    sx,
+    containerSx,
+    ...props
+  },
   ref,
 ) {
-  const py =
-    density === 'compact'
-      ? layout.sectionYCompact
-      : density === 'spacious'
-        ? layout.sectionYSpacious
-        : layout.sectionY;
+  const py = DENSITIES[density] ?? DENSITIES.default;
+  const flushTop = flush === 'top' || flush === 'both';
+  const flushBottom = flush === 'bottom' || flush === 'both';
 
   const tones = {
     default: {},
@@ -42,8 +68,8 @@ const Section = forwardRef(function Section(
       id={id}
       sx={{
         position: 'relative',
-        pt: py,
-        pb: py,
+        pt: flushTop ? 0 : py,
+        pb: flushBottom ? 0 : py,
         scrollMarginTop: 'calc(var(--ef-nav-h) + 20px)',
         ...tones[tone],
         ...sx,

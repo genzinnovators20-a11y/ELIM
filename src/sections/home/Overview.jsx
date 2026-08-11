@@ -14,7 +14,13 @@ import { intro } from '../../constants/content';
  */
 export default function Overview() {
   return (
-    <Section id="overview" tone="sunken" density="spacious">
+    /*
+      Default density, not spacious: this is the first section under the
+      masthead, and it should read as the Hero's continuation rather than as a
+      block floating away from it. `spacious` is reserved for the two deliberate
+      moments on the page — the staking pivot and the closing call.
+    */
+    <Section id="overview" tone="sunken">
       <Stack spacing={{ xs: 4, md: 5 }} sx={{ maxWidth: 1080 }}>
         <Reveal variant="fadeUpSm">
           <Eyebrow>Institutional Infrastructure</Eyebrow>

@@ -12,6 +12,7 @@ import AnimatedNumber from '../../components/ui/AnimatedNumber';
 import { hybridArchitecture } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
+import { layout } from '../../theme/tokens';
 
 /**
  * The Hybrid Asset Architecture.
@@ -34,7 +35,7 @@ export default function HybridArchitecture() {
         maxWidth={900}
       />
 
-      <Grid container spacing={{ xs: 6, lg: 8 }} alignItems="center" sx={{ mt: { xs: 4, md: 6 } }}>
+      <Grid container spacing={{ xs: 6, lg: 8 }} alignItems="center" sx={{ mt: layout.stack.head }}>
         <Grid size={{ xs: 12, lg: 5 }}>
           <Reveal variant="scale">
             <Box sx={{ position: 'relative' }}>
