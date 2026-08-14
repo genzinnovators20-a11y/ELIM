@@ -6,7 +6,7 @@ import { useReducedMotion } from 'framer-motion';
 import createCoinFaceTexture from './coinTexture';
 import useAssetAvailability from '../../hooks/useAssetAvailability';
 
-const COIN_ARTWORK = '/brand/elimcoin-gold.svg';
+const COIN_ARTWORK = '/brand/elimcoin-gold.webp';
 
 /**
  * The supplied artwork's own box inside its 1600x1600 sheet, measured off the
@@ -60,6 +60,23 @@ function Coin({ reduced }) {
     () => ({ color: '#D9B24A', metalness: 1, roughness: 0.2, envMapIntensity: 1.5 }),
     [],
   );
+  /**
+   * The struck face.
+   *
+   * NOTE, if this scene is ever brought back: these values do not reproduce the
+   * supplied artwork, and no adjustment of them will. The file is not a texture
+   * but a finished render, carrying its own baked lighting and the deep brown
+   * shadow sitting in every engraved channel. Lighting it a second time here
+   * lifts the darkest tenth of the face from the artwork's own 31/255 to 77, and
+   * drops saturation from 0.90 to 0.57 — the disc reads pale and silvery beside
+   * the flat-image coins used everywhere else on the page. Lowering metalness,
+   * scaling the albedo, cutting the lights and disabling tone mapping were each
+   * measured and none of them closed the gap; the artwork also appears mirrored
+   * for half of every rotation, because both caps map the same sheet.
+   *
+   * Matching the supplied coin means not relighting it — which is why the stage
+   * now presents the artwork directly. See `CoinStage`.
+   */
   const faceProps = useMemo(
     () => ({
       map: faceTexture,
@@ -146,10 +163,32 @@ function Studio() {
 }
 
 /**
+ * three.js reads the shader info log immediately after linking every program.
+ * That read forces the driver to finish compiling and linking there and then,
+ * on the main thread — for this scene's material set and the environment map's
+ * convolution passes it was the single most expensive thing on the page, and it
+ * landed as one long block right as the stage came into range.
+ *
+ * Switched off in production, the driver is free to compile lazily and in
+ * parallel. It only silences shader *error logging*, so it stays on in
+ * development where those messages are worth having; the rendered result is
+ * identical either way.
+ */
+const handleCreated = ({ gl }) => {
+  if (import.meta.env.PROD) gl.debug.checkShaderErrors = false;
+};
+
+/**
  * WebGL coin stage. Lazily imported by callers so three.js never lands in the
  * initial bundle, and capped at DPR 1.6 to keep fill-rate sane on laptops.
+ *
+ * `active` is the caller's report of whether the stage is on screen. Off screen
+ * the loop drops to `demand`, which still draws the scene once — so the shaders
+ * compile and the environment map bakes while the reader is on their way — and
+ * then stops, instead of animating a coin nobody is looking at for the length of
+ * a 22,000px page.
  */
-export default function CoinScene({ height = 520 }) {
+export default function CoinScene({ height = 520, active = true }) {
   const reduced = useReducedMotion();
 
   return (
@@ -158,7 +197,8 @@ export default function CoinScene({ height = 520 }) {
       dpr={[1, 1.6]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', toneMappingExposure: 0.95 }}
       camera={{ position: [0, 0, 4.4], fov: 34 }}
-      frameloop={reduced ? 'demand' : 'always'}
+      frameloop={reduced || !active ? 'demand' : 'always'}
+      onCreated={handleCreated}
     >
       {/* No background is attached — the canvas stays transparent so the page's
           own light rig shows through behind the coin. */}

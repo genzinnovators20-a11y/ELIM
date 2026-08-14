@@ -53,22 +53,37 @@ function ForgeStage({ showMarketPanel = false }) {
    */
   const rectRef = useRef(null);
 
+  /**
+   * Whether the pointer is over the rig. The scroll/resize refresh below is
+   * gated on it: `getBoundingClientRect()` forces a synchronous layout, and
+   * running it on every scroll event — which momentum scrolling fires
+   * continuously — spends a layout per event on a rect nothing is reading.
+   * Off the rig the rect is left stale; `pointerenter` re-measures before the
+   * first move can use it.
+   */
+  const insideRef = useRef(false);
+
   const measure = useCallback(() => {
     if (wrapRef.current) rectRef.current = wrapRef.current.getBoundingClientRect();
   }, []);
 
   useEffect(() => {
     if (reduced) return undefined;
-    window.addEventListener('resize', measure, { passive: true });
-    window.addEventListener('scroll', measure, { passive: true });
+    const onViewportChange = () => {
+      if (insideRef.current) measure();
+    };
+    window.addEventListener('resize', onViewportChange, { passive: true });
+    window.addEventListener('scroll', onViewportChange, { passive: true });
     return () => {
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', onViewportChange);
+      window.removeEventListener('scroll', onViewportChange);
     };
   }, [measure, reduced]);
 
   const handleEnter = useCallback(() => {
-    if (!reduced) measure();
+    if (reduced) return;
+    insideRef.current = true;
+    measure();
   }, [measure, reduced]);
 
   const handleMove = useCallback(
@@ -83,6 +98,7 @@ function ForgeStage({ showMarketPanel = false }) {
   );
 
   const handleLeave = useCallback(() => {
+    insideRef.current = false;
     px.set(0);
     py.set(0);
   }, [px, py]);

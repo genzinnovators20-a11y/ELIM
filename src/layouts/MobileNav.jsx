@@ -76,7 +76,7 @@ function MobileNav({ open, onClose, activeSection, onHome }) {
           justifyContent="space-between"
           sx={{ px: 2.5, height: 'var(--ef-nav-h)', borderBottom: (t) => `1px solid ${t.ef.borders.hairline}` }}
         >
-          <Logo size={34} showTag={false} />
+          <Logo size={38} showTag={false} />
           <IconButton onClick={onClose} aria-label="Close navigation menu">
             <CloseRounded />
           </IconButton>

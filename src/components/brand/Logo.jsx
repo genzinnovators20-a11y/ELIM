@@ -3,13 +3,19 @@ import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
 import { Link as RouterLink } from 'react-router-dom';
-import ElimMark from './ElimMark';
+import BrandArt from './BrandArt';
 import { fontFamilies } from '../../theme/typography';
 
 /**
  * Navigation / footer lockup: mark + wordmark + descriptor.
  * `onClick` lets the navbar intercept the click on the landing page and scroll
  * to the top instead of re-navigating to a route that is already active.
+ *
+ * The mark is the official ELIM COIN artwork, the same disc the footer plate and
+ * the ELIMCOIN stage carry, rather than a drawn monogram — so the identity is
+ * the supplied one everywhere it appears. `size` accepts a number or a
+ * responsive object and drives the mark's width; the square box it sits in is
+ * reserved before the image decodes, so the lockup never reflows around it.
  */
 function Logo({ size = 40, showTag = true, to = '/', onClick, sx }) {
   const handleClick = (event) => {
@@ -37,9 +43,14 @@ function Logo({ size = 40, showTag = true, to = '/', onClick, sx }) {
     >
       <Box
         className="ef-mark"
-        sx={{ transition: (t) => `transform 620ms ${t.ef.easings.css.luxe}`, willChange: 'transform' }}
+        sx={{
+          width: size,
+          flexShrink: 0,
+          transition: (t) => `transform 620ms ${t.ef.easings.css.luxe}`,
+          willChange: 'transform',
+        }}
       >
-        <ElimMark size={size} />
+        <BrandArt asset="mark" priority />
       </Box>
 
       <Box sx={{ minWidth: 0 }}>

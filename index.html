@@ -16,6 +16,14 @@
     <link rel="canonical" href="https://www.elimforge.com/" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!--
+      The masthead emblem is the Largest Contentful Paint element. It is rendered
+      by a lazily-loaded route, so the preload scanner would not otherwise see it
+      until the Home chunk has downloaded, parsed and run — the fetch is started
+      here instead so it overlaps the JavaScript rather than queueing behind it.
+    -->
+    <link rel="preload" as="image" href="/brand/elimcoin-blue.webp" type="image/webp" fetchpriority="high" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 

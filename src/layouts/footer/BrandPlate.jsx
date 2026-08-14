@@ -65,19 +65,27 @@ function BrandPlate() {
         {/*
           The official twin-palm mark, lifted straight out of the corporate
           card: `elimforge-palm.svg` holds footer.svg's own palm paths, in their
-          original order and colours, clipped to their own silhouette. Sized by
-          width alone so the supplied proportions are never stretched.
+          original order and colours, clipped to their own silhouette, and
+          `elimforge-palm.webp` is that file rendered at 2x its own canvas.
+          Sized by width alone so the supplied proportions are never stretched.
+
+          Width is a share of the plate rather than a pixel count, so the palm
+          holds the lockup's proportions from a 390px phone up to the desktop
+          rail instead of shrinking to a detail at one end and swelling at the
+          other. 52% of the content box puts the mark at ~43% of the card and at
+          about half the coin's width, which is how the two sit on the supplied
+          corporate card.
         */}
         <Box
           component="img"
-          src="/brand/elimforge-palm.svg"
+          src="/brand/elimforge-palm.webp"
           alt="ELIM FORGE palm emblem"
           width="201"
           height="178"
           loading="lazy"
           decoding="async"
           draggable={false}
-          sx={{ width: 38, height: 'auto', flexShrink: 0, userSelect: 'none' }}
+          sx={{ width: '52%', maxWidth: 176, height: 'auto', flexShrink: 0, userSelect: 'none' }}
         />
 
         <Box sx={{ position: 'relative', width: '100%', display: 'grid', placeItems: 'center' }}>
@@ -85,18 +93,25 @@ function BrandPlate() {
             aria-hidden
             sx={{
               position: 'absolute',
-              width: 'min(210px, 124%)',
+              width: '118%',
               aspectRatio: '1 / 1',
               background:
                 'radial-gradient(50% 50% at 50% 50%, rgba(212,175,55,0.2) 0%, transparent 68%)',
               pointerEvents: 'none',
             }}
           />
+          {/*
+            The coin is the plate's subject, not an icon on it: on the corporate
+            card the struck disc runs very nearly the full width of the panel.
+            Filling the content box reproduces that — `BrandArt` frames the disc
+            at 95% of its own square, so this lands the metal at ~82% of the
+            card, against the ~85% it occupies on the original.
+          */}
           <BrandArt
             asset="coin"
             sx={{
               position: 'relative',
-              width: { xs: 104, sm: 132, md: 124 },
+              width: '100%',
               filter: 'drop-shadow(0 16px 28px rgba(0,0,0,0.7))',
             }}
           />

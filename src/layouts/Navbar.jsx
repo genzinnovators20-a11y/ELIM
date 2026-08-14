@@ -162,7 +162,7 @@ function Navbar() {
       >
         <Container sx={{ maxWidth: (t) => t.ef.layout.maxWidthWide }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-            <Logo size={38} onClick={onHome ? () => jumpToTop({ smooth: true }) : undefined} />
+            <Logo size={{ xs: 40, md: 48 }} onClick={onHome ? () => jumpToTop({ smooth: true }) : undefined} />
 
             <Box
               component="nav"
