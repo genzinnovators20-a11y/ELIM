@@ -184,7 +184,6 @@ export default function Hero() {
                     border: (t) => `1px solid ${t.ef.borders.goldSoft}`,
                     background:
                       'linear-gradient(180deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.04) 100%)',
-                    backdropFilter: 'blur(10px)',
                     /* Inner top highlight — the glass catches light on its
                        upper edge, which is what gives a pill any thickness. */
                     boxShadow:

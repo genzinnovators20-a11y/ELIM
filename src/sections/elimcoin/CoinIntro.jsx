@@ -145,7 +145,6 @@ export default function CoinIntro() {
                   border: (t) => `1px solid ${t.ef.borders.soft}`,
                   boxShadow:
                     '0 1px 0 rgba(255,255,255,0.09) inset, 0 48px 100px -40px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.4)',
-                  backdropFilter: 'blur(16px)',
                   pt: { xs: 0, md: 0 },
                 }}
               >

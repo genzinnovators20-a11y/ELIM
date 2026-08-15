@@ -1,7 +1,8 @@
-import { forwardRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import { layout } from '../../theme/tokens';
+import useSectionContainment from '../../hooks/useSectionContainment';
 
 /**
  * Semantic section wrapper with the site's vertical rhythm.
@@ -61,9 +62,21 @@ const Section = forwardRef(function Section(
     },
   };
 
+  /* Own the node for containment while still honouring a caller's ref. */
+  const innerRef = useRef(null);
+  useSectionContainment(innerRef);
+  const setRefs = useCallback(
+    (node) => {
+      innerRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
+
   return (
     <Box
-      ref={ref}
+      ref={setRefs}
       component="section"
       id={id}
       sx={{

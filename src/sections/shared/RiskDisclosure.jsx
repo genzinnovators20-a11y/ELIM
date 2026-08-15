@@ -24,7 +24,6 @@ export default function RiskDisclosure({ id = 'risk-disclosure' }) {
             borderRadius: { xs: '20px', md: '24px' },
             border: (t) => `1px solid ${t.ef.borders.hairline}`,
             background: 'linear-gradient(160deg, rgba(255,255,255,0.028) 0%, rgba(0,0,0,0.28) 100%)',
-            backdropFilter: 'blur(14px)',
             p: { xs: 3, sm: 4, md: 5 },
             overflow: 'hidden',
           }}

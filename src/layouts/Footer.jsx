@@ -58,7 +58,6 @@ function Footer() {
         borderTop: (t) => `1px solid ${t.ef.borders.hairline}`,
         background:
           'linear-gradient(180deg, rgba(255,255,255,0.016) 0%, rgba(4,14,12,0.5) 34%, rgba(0,0,0,0.62) 100%)',
-        backdropFilter: 'blur(10px)',
       }}
     >
       {/* Gold hairline seam */}

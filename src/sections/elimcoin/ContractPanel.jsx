@@ -45,7 +45,6 @@ export default function ContractPanel() {
               border: (t) => `1px solid ${t.ef.borders.goldSoft}`,
               background:
                 'linear-gradient(140deg, rgba(212,175,55,0.075) 0%, rgba(255,255,255,0.014) 46%, rgba(212,175,55,0.045) 100%)',
-              backdropFilter: 'blur(16px)',
             }}
           >
             <Stack direction="row" spacing={2.5} alignItems="center">

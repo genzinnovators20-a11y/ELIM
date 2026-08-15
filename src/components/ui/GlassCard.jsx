@@ -65,11 +65,16 @@ const GlassCard = forwardRef(function GlassCard(
           ? 'linear-gradient(158deg, rgba(255,255,255,0.062) 0%, rgba(255,255,255,0.016) 48%, rgba(255,255,255,0.038) 100%)'
           : theme.ef.gradients.panel,
         backgroundColor: 'rgba(10, 13, 18, 0.5)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
         boxShadow: theme.ef.shadows.card,
         transition: `transform ${theme.ef.motion.settle}, box-shadow ${theme.ef.motion.settle}, background 480ms ease`,
-        willChange: interactive ? 'transform' : 'auto',
+
+        /* Promoted only while the pointer is on it. `will-change: transform`
+           left on permanently gave every interactive card its own compositor
+           layer for a 2px hover nudge — ~80 of them across the page, which the
+           compositor then had to carry on every frame. Hoisting it into the
+           hover state keeps the same movement and lets the layer exist for the
+           fraction of a second it is needed. */
+        ...(interactive && { '&:hover': { willChange: 'transform' } }),
 
         // Gradient hairline border. The accent stop brightens under the cursor
         // via `--ef-spot-o`, so the edge picks up the light with the face.

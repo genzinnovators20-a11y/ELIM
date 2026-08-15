@@ -119,7 +119,6 @@ export default function AuthLayout({ eyebrow, title, subtitle, children, footer 
                     borderRadius: '24px',
                     border: (t) => `1px solid ${t.ef.borders.hairline}`,
                     background: 'linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.32) 100%)',
-                    backdropFilter: 'blur(20px)',
                     boxShadow: (t) => t.ef.shadows.card,
                   }}
                 >

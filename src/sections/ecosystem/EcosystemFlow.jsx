@@ -185,7 +185,6 @@ export default function EcosystemFlow() {
                     background: isActive
                       ? `linear-gradient(160deg, ${alphaOf(item.accent, 0.14)}, rgba(8,11,16,0.9))`
                       : 'rgba(10,13,18,0.82)',
-                    backdropFilter: 'blur(16px)',
                     boxShadow: isActive
                       ? `0 20px 50px -24px ${alphaOf(item.accent, 0.8)}`
                       : '0 18px 40px -26px rgba(0,0,0,0.9)',
