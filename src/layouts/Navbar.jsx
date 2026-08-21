@@ -35,43 +35,63 @@ function NavItem({ item, active, onActivate }) {
         whiteSpace: 'nowrap',
         borderRadius: 1,
         '&:hover': { color: 'text.primary' },
-        '&:hover .nav-dot': { opacity: 0.5, transform: 'translateX(-50%) scale(1)' },
+        '&:hover .nav-dot': { opacity: 0.5, transform: 'scale(1)' },
       }}
     >
       {item.label}
-      {active && (
-        <MotionBox
-          layoutId="nav-active"
-          transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-          sx={{
-            position: 'absolute',
-            bottom: 2,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 18,
-            height: 2,
-            borderRadius: 999,
-            background: (t) => t.ef.gradients.goldFill,
-            boxShadow: '0 0 12px rgba(212,175,55,0.7)',
-          }}
-        />
-      )}
+
+      {/*
+        Indicator rail.
+
+        Centring is done by layout, never by a transform on the indicator
+        itself. `layoutId` hands ownership of that element's `transform` to
+        framer-motion's shared-layout projection, which writes its own value
+        while animating and `transform: none` once it settles — silently
+        deleting a CSS `translateX(-50%)` and leaving the bar half its own
+        width to the right of centre from the first section change onward.
+        A flex row plus a fixed-size slot gives the same centring with no
+        transform to lose, at any viewport width, with no measured pixels.
+      */}
       <Box
-        className="nav-dot"
         aria-hidden
         sx={{
           position: 'absolute',
+          left: 0,
+          right: 0,
           bottom: 2,
-          left: '50%',
-          transform: 'translateX(-50%) scale(0.4)',
-          width: 18,
-          height: 2,
-          borderRadius: 999,
-          background: 'rgba(255,255,255,0.4)',
-          opacity: 0,
-          transition: (t) => `all 380ms ${t.ef.easings.css.luxe}`,
+          display: 'flex',
+          justifyContent: 'center',
+          pointerEvents: 'none',
         }}
-      />
+      >
+        <Box sx={{ position: 'relative', width: 18, height: '2px' }}>
+          <Box
+            className="nav-dot"
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.4)',
+              opacity: 0,
+              transform: 'scale(0.4)',
+              transition: (t) => `opacity 380ms ${t.ef.easings.css.luxe}, transform 380ms ${t.ef.easings.css.luxe}`,
+            }}
+          />
+          {active && (
+            <MotionBox
+              layoutId="nav-active"
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: 999,
+                background: (t) => t.ef.gradients.goldFill,
+                boxShadow: '0 0 12px rgba(212,175,55,0.7)',
+              }}
+            />
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 }

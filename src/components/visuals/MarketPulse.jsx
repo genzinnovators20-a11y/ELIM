@@ -15,7 +15,7 @@ const rgba = (c, a) => `rgba(${c.r}, ${c.g}, ${c.b}, ${a})`;
  * single rAF loop, pauses when scrolled out of view or when the tab is hidden,
  * and renders one static frame under `prefers-reduced-motion`.
  */
-function MarketPulse({ height = 240, candleWidth = 9, gap = 5, sx, ...props }) {
+function MarketPulse({ height = 240, candleWidth = 9, gap = 5, meanReversion = 0, sx, ...props }) {
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
   const reduced = useReducedMotion();
@@ -49,7 +49,18 @@ function MarketPulse({ height = 240, candleWidth = 9, gap = 5, sx, ...props }) {
       const drift = 0.16;
       const volatility = 3.1;
       const open = price;
-      const move = (rand() - 0.5) * volatility + drift;
+      /**
+       * Optional pull back toward the middle of the band.
+       *
+       * A pure positive-drift walk climbs to the clamp within its own warm-up
+       * and then stays there: the trace flattens against the top of the window
+       * and the candles collapse, because every move that would take the price
+       * past 92 is discarded. Callers that want the series to keep living in
+       * the band opt in; at 0 the term is exactly zero and the walk is the one
+       * it has always been, seed for seed.
+       */
+      const pull = meanReversion * (56 - price) * 0.045;
+      const move = (rand() - 0.5) * volatility + drift + pull;
       const close = Math.max(12, Math.min(92, open + move));
       const wick = rand() * 2.2 + 0.5;
       price = close;
@@ -230,7 +241,7 @@ function MarketPulse({ height = 240, candleWidth = 9, gap = 5, sx, ...props }) {
       io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [height, candleWidth, gap, reduced]);
+  }, [height, candleWidth, gap, meanReversion, reduced]);
 
   return (
     <Box ref={wrapRef} aria-hidden sx={{ width: '100%', lineHeight: 0, ...sx }} {...props}>

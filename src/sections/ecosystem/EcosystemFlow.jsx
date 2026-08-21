@@ -17,16 +17,36 @@ import { easings, layout } from '../../theme/tokens';
 
 const MotionPath = motion.path;
 
-/**
- * Node angles on a 100×100 field. The horizontal radius tightens on narrow
- * viewports so the cards stay fully inside the container.
- */
+/** Node angles on a 100×100 field, for viewports wide enough to hold the ring. */
 const ANGLES = [202, 338, 118, 62];
 
-const toXY = (angle, spread) => ({
-  x: 50 + Math.cos((angle * Math.PI) / 180) * spread,
+const toXY = (angle) => ({
+  x: 50 + Math.cos((angle * Math.PI) / 180) * 36,
   y: 50 + Math.sin((angle * Math.PI) / 180) * 40,
 });
+
+/**
+ * Narrow viewports get their own geometry rather than a squeezed copy of the
+ * ring.
+ *
+ * The ring's lower pair sits at 118° and 62°, whose cosines are 0.47 against
+ * the upper pair's 0.93 — so those two nodes are only half as far apart
+ * horizontally as the ones above them. On a desktop that reads as a diamond; on
+ * a phone the two cards are wider than the gap the angles leave and they simply
+ * overlap, which is what the collision at the bottom of the figure was. Pulling
+ * the radius in made it worse, because the cards do not shrink with it.
+ *
+ * The phone layout therefore states positions directly: four nodes at the
+ * corners of a tall field with the coin holding the middle. Same concept, same
+ * conduits, same reading order — a composition for the viewport it is in rather
+ * than a compression of another one.
+ */
+const NARROW_NODES = [
+  { x: 25, y: 17 },
+  { x: 75, y: 17 },
+  { x: 25, y: 83 },
+  { x: 75, y: 83 },
+];
 
 /**
  * The ecosystem, drawn.
@@ -41,7 +61,7 @@ export default function EcosystemFlow() {
   const reduced = useReducedMotion();
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
-  const spread = isNarrow ? 28 : 36;
+  const nodes = isNarrow ? NARROW_NODES : ANGLES.map(toXY);
 
   return (
     <Section id="flow" tone="contrast" density="compact">
@@ -54,7 +74,22 @@ export default function EcosystemFlow() {
           sx={{
             position: 'relative',
             mt: layout.stack.tight,
-            aspectRatio: { xs: '1 / 1.16', sm: '1.6 / 1', md: '2.45 / 1' },
+            /*
+              The clearances in this figure are pixel quantities — card heights,
+              the coin, its caption — while the field was sized purely by ratio,
+              so whether they fitted at all depended on the viewport: below about
+              1200px the ratio left the ring shorter than its own contents and
+              the lower nodes rose into the coin's caption.
+              
+              Stated heights up to `lg`, ratio above it, where the ratio is
+              already taller than the contents need. A `min-height` on the
+              ratio box is the trap here rather than the fix: `aspect-ratio`
+              resolves the other axis from whichever one is definite, so the
+              floor inflates the *width* to keep 2.45:1 and the right-hand node
+              is pushed straight out of the viewport.
+            */
+            height: { xs: 470, sm: 400, md: 440, lg: 'auto' },
+            aspectRatio: { lg: '2.45 / 1' },
             maxWidth: 1120,
             mx: 'auto',
           }}
@@ -77,7 +112,7 @@ export default function EcosystemFlow() {
             </defs>
 
             {industries.items.map((item, i) => {
-              const { x, y } = toXY(ANGLES[i], spread);
+              const { x, y } = nodes[i];
               const d = `M 50 50 Q ${(50 + x) / 2 + (y - 50) * 0.18} ${(50 + y) / 2 - (x - 50) * 0.18}, ${x} ${y}`;
               const isActive = active === i;
               return (
@@ -147,7 +182,7 @@ export default function EcosystemFlow() {
 
           {/* Industry nodes */}
           {industries.items.map((item, i) => {
-            const { x, y } = toXY(ANGLES[i], spread);
+            const { x, y } = nodes[i];
             const isActive = active === i;
             return (
               /* The centring translate lives on this wrapper: framer-motion owns
@@ -163,8 +198,10 @@ export default function EcosystemFlow() {
                   transform: `translate(-50%, -50%) translateY(${isActive ? -4 : 0}px)`,
                   transition: (t) => `transform 520ms ${t.ef.easings.css.luxe}`,
                   zIndex: isActive ? 4 : 3,
-                  width: { xs: 116, sm: 168, md: 200 },
-                  maxWidth: '46%',
+                  /* 44% leaves a real gutter between the two columns at every
+                     phone width, and the cap stops them ballooning at 599px. */
+                  width: { xs: '44%', sm: 168, md: 200 },
+                  maxWidth: { xs: 200, sm: '46%' },
                 }}
               >
                 <Stack
@@ -197,7 +234,7 @@ export default function EcosystemFlow() {
                   </Box>
                   <Typography
                     sx={{
-                      fontSize: { xs: '0.6875rem', md: '0.8125rem' },
+                      fontSize: { xs: '0.75rem', md: '0.8125rem' },
                       fontWeight: 600,
                       letterSpacing: '-0.005em',
                       color: isActive ? 'text.primary' : 'text.secondary',
