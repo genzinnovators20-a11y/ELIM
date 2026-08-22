@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
-import { useReducedMotion } from 'framer-motion';
+import useReducedMotion from './useReducedMotion';
 
 let lenisInstance = null;
 
@@ -58,8 +58,22 @@ export const jumpToTop = ({ smooth = false } = {}) => {
 };
 
 /**
- * Momentum smooth scrolling, driven by rAF and disabled outright when the user
- * has asked for reduced motion (Lenis hijacks native scroll, so it must go).
+ * Momentum smooth scrolling for the wheel.
+ *
+ * Disabled outright in two cases:
+ *
+ *  - **Reduced motion.** Lenis hijacks native scroll, so it has to go entirely
+ *    rather than be softened.
+ *  - **Coarse pointers.** This is what it is actually for: taking the edge off a
+ *    wheel notch. It is configured with `syncTouch: false`, so on a touchscreen
+ *    it was already handing scrolling straight back to the platform — while
+ *    still holding a `requestAnimationFrame` loop open for the life of the
+ *    session to smooth a wheel that does not exist. A phone was running an
+ *    animation frame, every frame, forever, to do nothing; and a page with a
+ *    live rAF loop is a page Blink runs its full rendering lifecycle over on
+ *    every frame. Native touch scrolling is also better than anything layered
+ *    on top of it: it runs on the compositor, it survives a busy main thread,
+ *    and it matches the platform's own overscroll and momentum.
  */
 export function useSmoothScroll() {
   const reduced = useReducedMotion();
@@ -68,6 +82,7 @@ export function useSmoothScroll() {
   useEffect(() => {
     if (reduced) return undefined;
     if (typeof window === 'undefined') return undefined;
+    if (window.matchMedia?.('(pointer: coarse)').matches) return undefined;
 
     /**
      * Tuned for immediacy rather than glide.

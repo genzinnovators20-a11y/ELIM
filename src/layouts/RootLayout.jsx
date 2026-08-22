@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
+import useAfterPaint from '../hooks/useAfterPaint';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -79,6 +80,19 @@ function ScrollManager() {
 export default function RootLayout() {
   useSmoothScroll();
 
+  /*
+   * The footer waits for a frame.
+   *
+   * It sits at the bottom of a 22,000px document — nobody has ever seen it
+   * during a page load — but it is a substantial piece of DOM in its own right:
+   * a brand plate with artwork, four link columns, a contact rail and a social
+   * rail. Rendering it into the first commit charges the reader for all of it
+   * before the masthead can be drawn. One frame later costs nothing anyone can
+   * observe, and it is not lazily *loaded* — the code is already in the entry
+   * bundle, so it is there the moment the frame turns over.
+   */
+  const painted = useAfterPaint();
+
   return (
     <Box sx={{ position: 'relative', minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <BackgroundStage />
@@ -97,7 +111,7 @@ export default function RootLayout() {
       </Box>
 
       <Box sx={{ position: 'relative', zIndex: 1 }}>
-        <Footer />
+        {painted && <Footer />}
       </Box>
     </Box>
   );

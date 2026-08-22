@@ -1,12 +1,9 @@
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
-import { motion } from 'framer-motion';
 import { getAccent, alphaOf } from '../../utils/accents';
-import { easings } from '../../theme/tokens';
+import useReveal from '../../hooks/useReveal';
 import { fontFamilies } from '../../theme/typography';
-
-const MotionBox = motion.create(Box);
 
 /**
  * A single allocation row: category, percentage, token volume and a proportional
@@ -25,6 +22,7 @@ export default function AllocationBar({
   onHover,
 }) {
   const accent = getAccent(color);
+  const revealRef = useReveal();
 
   return (
     <Box
@@ -102,15 +100,16 @@ export default function AllocationBar({
 
       {/* Meter */}
       <Box sx={{ position: 'relative', height: 4, borderRadius: 999, background: 'rgba(255,255,255,0.045)', overflow: 'hidden' }}>
-        <MotionBox
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: value / scale }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: 1.15, ease: easings.luxe, delay: 0.1 + index * 0.07 }}
+        <Box
+          ref={revealRef}
+          className="ef-meter"
+          style={{
+            '--meter-fill': value / scale,
+            '--meter-delay': `${Math.round((0.1 + index * 0.07) * 1000)}ms`,
+          }}
           sx={{
             position: 'absolute',
             inset: 0,
-            transformOrigin: 'left',
             borderRadius: 999,
             background: `linear-gradient(90deg, ${accent.deep}, ${accent.base} 60%, ${accent.light})`,
             boxShadow: active ? `0 0 14px ${alphaOf(color, 0.6)}` : 'none',

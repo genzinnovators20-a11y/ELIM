@@ -1,8 +1,7 @@
 import { useId, useRef } from 'react';
 import Box from '@mui/material/Box';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
+import useInView from '../../hooks/useInView';
 import { getAccent } from '../../utils/accents';
-import { easings } from '../../theme/tokens';
 
 /**
  * Single-value arc gauge with a tick bezel — used where one proportion needs to
@@ -22,7 +21,6 @@ export default function RadialGauge({
   const uid = useId().replace(/:/g, '');
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
-  const reduced = useReducedMotion();
   const accent = getAccent(color);
 
   const r = (size - thickness) / 2 - 14;
@@ -84,7 +82,8 @@ export default function RadialGauge({
             strokeLinecap="round"
             strokeDasharray={`${arcLength} ${circumference}`}
           />
-          <motion.circle
+          <circle
+            className="ef-arc"
             cx={c}
             cy={c}
             r={r}
@@ -93,10 +92,12 @@ export default function RadialGauge({
             strokeWidth={thickness}
             strokeLinecap="round"
             strokeDasharray={`${filled} ${circumference}`}
-            initial={{ strokeDashoffset: filled }}
-            animate={inView || reduced ? { strokeDashoffset: 0 } : undefined}
-            transition={{ duration: reduced ? 0 : 1.6, ease: easings.luxe, delay: 0.15 }}
-            style={{ filter: `drop-shadow(0 0 14px ${accent.base}66)` }}
+            strokeDashoffset={inView ? 0 : filled}
+            style={{
+              '--arc-duration': '1600ms',
+              '--arc-delay': '150ms',
+              filter: `drop-shadow(0 0 14px ${accent.base}66)`,
+            }}
           />
         </g>
       </Box>

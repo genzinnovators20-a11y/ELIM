@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
-import { useReducedMotion } from 'framer-motion';
+import useReducedMotion from '../../hooks/useReducedMotion';
 
 const UP = { r: 31, g: 185, b: 138 }; // emerald
 const DOWN = { r: 76, g: 141, b: 255 }; // electric blue

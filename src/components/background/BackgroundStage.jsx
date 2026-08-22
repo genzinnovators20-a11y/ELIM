@@ -12,7 +12,21 @@ const drift = keyframes`
   100% { transform: translate3d(0, 0, 0) scale(1); }
 `;
 
-/** A single slow-moving light source. Transform-only, so it stays on the GPU. */
+/**
+ * A single slow-moving light source.
+ *
+ * The gradient does its own softening. It used to carry `filter: blur(28px)` on
+ * top, which is the expensive way to arrive at the same picture: a filtered
+ * layer has to be rasterised into a texture and blurred, and because the drift
+ * animates `scale`, that rasterisation is invalidated and redone as the element
+ * grows — four of them, permanently, on every device that opens the page. A
+ * radial gradient is already a soft falloff; the stops below simply carry the
+ * feathering the blur was adding, and the compositor gets a plain painted layer
+ * it can transform for free.
+ *
+ * The difference is not visible side by side. The difference in what the GPU is
+ * asked to do is the whole of this component's cost.
+ */
 const Bloom = ({ color, size, top, left, right, bottom, delay = 0, duration = 34, opacity = 1 }) => (
   <Box
     aria-hidden
@@ -25,8 +39,9 @@ const Bloom = ({ color, size, top, left, right, bottom, delay = 0, duration = 34
       width: size,
       height: size,
       borderRadius: '50%',
-      background: `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 68%)`,
-      filter: 'blur(28px)',
+      /* Three stops rather than two: the middle one holds the core's weight
+         while the outer reach stays long, which is what the blur was doing. */
+      background: `radial-gradient(circle at 50% 50%, ${color} 0%, ${color} 18%, transparent 72%)`,
       opacity,
       willChange: 'transform',
       animation: `${drift} ${duration}s ease-in-out ${delay}s infinite`,
@@ -44,6 +59,7 @@ function BackgroundStage() {
   return (
     <Box
       aria-hidden
+      data-ef-layer="stage"
       sx={{
         position: 'fixed',
         inset: 0,
@@ -61,7 +77,7 @@ function BackgroundStage() {
       <Bloom color="rgba(212, 175, 55, 0.16)" size="min(42vw, 600px)" bottom="-8%" left="18%" delay={-16} duration={50} />
       <Bloom color="rgba(142, 123, 240, 0.14)" size="min(36vw, 520px)" bottom="18%" right="22%" delay={-24} duration={46} />
 
-      <GridField size={68} major={4} opacity={0.42} mask="radial-gradient(130% 100% at 50% 12%, #000 8%, transparent 72%)" />
+      <GridField data-ef-layer="grid" size={68} major={4} opacity={0.42} mask="radial-gradient(130% 100% at 50% 12%, #000 8%, transparent 72%)" />
 
       {/* Vignette */}
       <Box
@@ -77,7 +93,7 @@ function BackgroundStage() {
           edges of the frame, not only in the middle. */}
       <CursorLight />
 
-      <NoiseOverlay opacity={0.042} />
+      <NoiseOverlay opacity={0.05} />
     </Box>
   );
 }

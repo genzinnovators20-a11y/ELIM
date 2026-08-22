@@ -2,8 +2,7 @@ import Box from '@mui/material/Box';
 import { Grid, Stack } from '@/components/ui/layout';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import { motion } from 'framer-motion';
-import CoinStage from '../../components/three/CoinStage';
+import CoinStage from '../../components/visuals/CoinStage';
 import MarketPulse from '../../components/visuals/MarketPulse';
 import GradientText from '../../components/ui/GradientText';
 import CTAButton from '../../components/ui/CTAButton';
@@ -11,19 +10,7 @@ import Section from '../../components/ui/Section';
 import { scrollToTarget } from '../../hooks/useSmoothScroll';
 import { elimcoin } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
-import { easings } from '../../theme/tokens';
-
-const MotionBox = motion.create(Box);
-
-const rise = {
-  hidden: { opacity: 0, y: 26, filter: 'blur(9px)' },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 1, ease: easings.luxe, delay: 0.05 + i * 0.09 },
-  }),
-};
+import Reveal from '../../components/ui/Reveal';
 
 /** Split the lede so the token designation carries the metallic emphasis. */
 const [ledeBefore, ledeAfter = ''] = elimcoin.lede.split(elimcoin.ledeEmphasis);
@@ -53,14 +40,15 @@ export default function CoinIntro() {
           right: '-6%',
           width: 'min(900px, 90vw)',
           height: 'min(900px, 90vw)',
-          background: 'radial-gradient(50% 50% at 50% 50%, rgba(212,175,55,0.16) 0%, transparent 68%)',
-          filter: 'blur(24px)',
+          /* Painted rather than filtered — see the ecosystem opener. */
+          background:
+            'radial-gradient(50% 50% at 50% 50%, rgba(212,175,55,0.16) 0%, rgba(212,175,55,0.06) 34%, transparent 72%)',
           pointerEvents: 'none',
         }}
       />
 
       <Container sx={{ maxWidth: (t) => t.ef.layout.maxWidthWide, position: 'relative', zIndex: 1 }}>
-        <MotionBox custom={0} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+        <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.05}>
           <Typography
             id="elimcoin-title"
             variant="display2"
@@ -71,12 +59,12 @@ export default function CoinIntro() {
               {elimcoin.title}
             </GradientText>
           </Typography>
-        </MotionBox>
+        </Reveal>
 
         <Grid container spacing={{ xs: 6, lg: 6 }} alignItems="center">
           <Grid size={{ xs: 12, lg: 6.2 }}>
             <Stack spacing={{ xs: 3, md: 3.5 }}>
-              <MotionBox custom={1} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+              <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.14}>
                 <Typography
                   component="h3"
                   sx={{
@@ -91,17 +79,17 @@ export default function CoinIntro() {
                 >
                   {elimcoin.kicker}
                 </Typography>
-              </MotionBox>
+              </Reveal>
 
-              <MotionBox custom={2} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+              <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.23}>
                 <Typography variant="quote" component="p">
                   <GradientText fill="gold" component="span">
                     {elimcoin.tagline}
                   </GradientText>
                 </Typography>
-              </MotionBox>
+              </Reveal>
 
-              <MotionBox custom={3} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+              <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.32}>
                 <Typography
                   variant="subtitle1"
                   component="p"
@@ -113,25 +101,25 @@ export default function CoinIntro() {
                   </Box>
                   {ledeAfter}
                 </Typography>
-              </MotionBox>
+              </Reveal>
 
-              <MotionBox custom={4} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }} sx={{ pt: 1 }}>
+              <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.41} sx={{ pt: 1 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.75}>
                   <CTAButton onClick={() => scrollToTarget('#tokenomics')}>{elimcoin.ctaPrimary}</CTAButton>
                   <CTAButton variant="outlined" magnetic={false} showArrow={false} href="#">
                     {elimcoin.ctaSecondary}
                   </CTAButton>
                 </Stack>
-              </MotionBox>
+              </Reveal>
             </Stack>
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5.8 }}>
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 1.4, ease: easings.luxe, delay: 0.2 }}
+            <Reveal
+              variant="scale"
+              scale={0.9}
+              duration={1.4}
+              delay={0.2}
               sx={{ position: 'relative', px: { xs: 0, sm: 4, md: 8, lg: 0 } }}
             >
               {/* Dark, metallic-textured UI mock-up */}
@@ -221,7 +209,7 @@ export default function CoinIntro() {
               >
                 <CoinStage height={330} />
               </Box>
-            </MotionBox>
+            </Reveal>
           </Grid>
         </Grid>
       </Container>

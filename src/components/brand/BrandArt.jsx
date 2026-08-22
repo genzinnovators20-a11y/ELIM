@@ -1,6 +1,5 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import Box from '@mui/material/Box';
-import useAssetAvailability from '../../hooks/useAssetAvailability';
 import EmblemFallback from './EmblemFallback';
 import CoinFallback from './CoinFallback';
 
@@ -56,17 +55,23 @@ function frameArt(canvas, box) {
 
 /*
  * Official ELIMCOIN artwork, and the source of truth for both marks. Every coin
- * surface on the site resolves through these two entries, so each mark stays
+ * surface on the site resolves through these entries, so each mark stays
  * identical everywhere it appears, and the `frame` boxes are measured off each
  * file's own alpha channel — which is what holds the disc centred and at the
  * weight the vector stand-in held.
  *
- * Served as WebP rendered from the supplied SVGs at more than twice the largest
- * size either mark is ever displayed at. The originals are auto-traced exports —
- * 13,481 and 6,057 separately-filled paths — which the browser re-rasterises
- * from scratch at every distinct display size, at 60-100ms of blocked main
- * thread each time. Same artwork, same framing, same alpha; only the decode
- * path changes. The SVGs remain in this directory as the masters.
+ * Served as WebP rendered from the supplied SVGs. The originals are auto-traced
+ * exports — 13,481 and 6,057 separately-filled paths, 5MB and 2MB of path data —
+ * which the browser re-rasterises from scratch at every distinct display size,
+ * at 60-100ms of blocked main thread each time. Same artwork, same framing, same
+ * alpha; only the decode path changes. The SVG masters live in `brand-src/`.
+ *
+ * **Each entry is rendered at the size it is actually displayed at.** They were
+ * previously encoded near-losslessly at whatever resolution the export happened
+ * to produce, which put 313KB of emblem and 228KB of coin on the masthead's
+ * critical path to paint them at roughly 700px and 160px. Re-encoded against a
+ * measured PSNR floor of ~36dB — the point at which the difference stops being
+ * visible on this artwork — that is 112KB and 59KB for the same two surfaces.
  *
  * Presentation stops here. Callers own their own glow, blur, opacity, ghosted
  * duplicates and watermark layers; those live on wrappers outside this
@@ -76,33 +81,59 @@ function frameArt(canvas, box) {
 const BRAND_ASSETS = {
   emblem: {
     src: '/brand/elimcoin-blue.webp',
+    width: 1400,
+    height: 959,
     alt: 'ELIM FORGE — forged with blockchain',
     Fallback: EmblemFallback,
     frame: frameArt([1516, 1038], [336, 67, 854, 869]),
   },
+
+  /**
+   * The full gold coin, for the one surface that shows it large: the turning
+   * disc on the ELIMCOIN stage, at 330px on a 3x screen. Nothing above the fold
+   * uses it — see `coinSm`.
+   */
   coin: {
     src: '/brand/elimcoin-gold.webp',
+    width: 1024,
+    height: 1024,
     alt: 'ELIM Coin (ELM) — Binance Smart Chain BEP-20 token',
     Fallback: CoinFallback,
     frame: frameArt([1600, 1600], [61, 55, 1480, 1481]),
   },
+
   /**
-   * The same gold coin, rendered small for the navigation lockup.
+   * The same coin at 512px, for every surface that shows it small — the coin
+   * drifting free of the masthead rig (~160px), the inline coin glyphs in the
+   * ecosystem, staking and CTA sections (52-90px), and the footer plate.
    *
-   * A separate file rather than a reuse of `coin`, because the mark is drawn at
-   * 40-48px and the full asset is 228KB, sized for a 330px stage. The footer
-   * plate does load that larger file on every route, but it sits below the fold
-   * and is lazy; the navigation bar is above it and eager. Pointing the mark at
-   * the same file would therefore promote a quarter of a megabyte onto the
-   * critical path of every page, to paint something the size of a fingernail.
-   * At 192px this still carries 1.3x what a 50px mark needs on a 3x screen, and
-   * costs 17KB.
+   * The masthead one is the reason this exists. It is `priority`, so it competes
+   * with the emblem and the JavaScript for the first connection, and it was
+   * fetching a 1024px sheet to paint a 160px disc — a quarter of a megabyte of
+   * critical-path bandwidth for six times the pixels the slot can show. At 512
+   * it still carries 3.2x what that slot needs on a 3x screen.
    *
-   * Rendered from the same 1600x1600 sheet at the same padding, so `frame` is
-   * identical and the mark sits in its box exactly as the full coin does.
+   * Rendered from the same 1600x1600 master at the same padding, so `frame` is
+   * identical and it drops into a slot exactly as the full coin does.
+   */
+  coinSm: {
+    src: '/brand/elimcoin-gold-sm.webp',
+    width: 512,
+    height: 512,
+    alt: 'ELIM Coin (ELM) — Binance Smart Chain BEP-20 token',
+    Fallback: CoinFallback,
+    frame: frameArt([1600, 1600], [61, 55, 1480, 1481]),
+  },
+
+  /**
+   * The same gold coin again, rendered for the navigation lockup where the mark
+   * is drawn at 40-48px. At 192px this carries 1.3x what a 50px mark needs on a
+   * 3x screen, and costs 14KB.
    */
   mark: {
     src: '/brand/elimcoin-gold-mark.webp',
+    width: 192,
+    height: 192,
     alt: 'ELIM FORGE',
     Fallback: CoinFallback,
     frame: frameArt([1600, 1600], [61, 55, 1480, 1481]),
@@ -111,18 +142,32 @@ const BRAND_ASSETS = {
 
 /**
  * Renders a supplied brand image with `object-fit: contain` (never stretched,
- * never distorted) and degrades to the hand-authored vector mark when the file
- * has not been added to /public/brand yet.
+ * never distorted) and degrades to the hand-authored vector mark if the file is
+ * ever missing.
  *
  * Assets carrying a `frame` are presented through a square window onto their
  * own padded canvas instead — same square box, same centre, so they are drop-in
  * for the stand-in they replace. See `frameArt`.
+ *
+ * **The `<img>` is in the first render.** It used to be gated behind a
+ * `new Image()` probe that resolved whether the file had been dropped into
+ * /public/brand yet; the element only entered the DOM once that probe came back.
+ * On the masthead that made the emblem — the Largest Contentful Paint element —
+ * wait for JavaScript to download, parse, execute, mount, run an effect, load an
+ * image and then re-render, and it measured a 2.6s LCP on a desktop with a fast
+ * connection and nothing else to do. The `<link rel="preload">` in the document
+ * head was paying for the bytes early and then having them sit unused for a
+ * second.
+ *
+ * The probe was solving a problem that no longer exists: both files are in the
+ * repository. `onError` covers the case it was insuring against, at no cost to
+ * the path where the file is present, and the vector mark still renders if a
+ * deployment ever ships without the artwork.
  */
-function BrandArt({ asset = 'coin', alt, priority = false, sx, imgSx, ...props }) {
+function BrandArt({ asset = 'coin', alt, priority = false, sizes, sx, imgSx, ...props }) {
   const config = BRAND_ASSETS[asset] ?? BRAND_ASSETS.coin;
-  const src = config.src ?? config.png;
-  const status = useAssetAvailability(src);
-  const { Fallback, frame } = config;
+  const { Fallback, frame, src, width, height } = config;
+  const [failed, setFailed] = useState(false);
 
   return (
     <Box
@@ -140,15 +185,21 @@ function BrandArt({ asset = 'coin', alt, priority = false, sx, imgSx, ...props }
       }}
       {...props}
     >
-      {status === 'ready' ? (
+      {failed ? (
+        <Fallback />
+      ) : (
         <Box
           component="img"
           src={src}
           alt={alt ?? config.alt}
+          width={width}
+          height={height}
+          sizes={sizes}
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'auto'}
-          decoding="async"
+          decoding={priority ? 'sync' : 'async'}
           draggable={false}
+          onError={() => setFailed(true)}
           sx={{
             ...(frame
               ? { position: 'absolute', ...frame }
@@ -157,8 +208,6 @@ function BrandArt({ asset = 'coin', alt, priority = false, sx, imgSx, ...props }
             ...imgSx,
           }}
         />
-      ) : (
-        <Fallback />
       )}
     </Box>
   );

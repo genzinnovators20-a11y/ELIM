@@ -1,0 +1,181 @@
+/*
+ * Scroll entrances, as CSS.
+ *
+ * Every reveal on the site used to be a `framer-motion` component with
+ * `whileInView`. There are 106 of them on the landing page, and each one is a
+ * React component wrapping a MUI `Box`, carrying a VisualElement, a variant
+ * resolver, a set of motion values and its own viewport subscription — all
+ * mounted during the first render, all of it before the reader has seen
+ * anything.
+ *
+ * The visual result here is identical, because it is the same numbers: the same
+ * 18px rise, the same 0.9s luxe curve, the same 7px lens blur on headlines, the
+ * same 90ms cascade. What changes is who runs it. The transition is declared
+ * once in this stylesheet, one shared IntersectionObserver adds a class, and the
+ * compositor animates transform and opacity without the main thread being
+ * involved at all after the class lands.
+ *
+ * Every quantity is a custom property, so a call site that needs a longer
+ * travel or a heavier lens blur than the house default overrides that one
+ * number rather than reaching for a second animation system.
+ *
+ * See `src/components/ui/Reveal.jsx` for the observer.
+ */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(var(--rv-x, 0), var(--rv-y, 0), 0) scale(var(--rv-scale, 1));
+  filter: blur(var(--rv-blur, 0px));
+
+  /* `will-change` is deliberately absent. 106 permanently promoted layers is a
+     compositor bill the page pays for the whole session in order to animate
+     each one once; transform and opacity are promoted for the duration of a
+     transition anyway. */
+  transition-property: opacity, transform, filter;
+  transition-duration: var(--rv-duration, 900ms);
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--rv-delay, 0ms);
+}
+
+/*
+ * Reveal displacement is deliberately short. A long travel makes the page feel
+ * like it is assembling itself in front of the reader; 18px reads as the
+ * content settling into place. Opacity does most of the work — distance only
+ * supplies direction.
+ */
+[data-reveal='fadeUp']   { --rv-y: 18px; }
+[data-reveal='fadeUpSm'] { --rv-y: 10px; --rv-duration: 500ms; }
+[data-reveal='fade']     { /* opacity only */ }
+[data-reveal='scale']    { --rv-scale: 0.98; }
+[data-reveal='left']     { --rv-x: -24px; }
+[data-reveal='right']    { --rv-x: 24px; }
+
+/* Headline entrance. The blur is kept light — anything heavier reads as a focus
+   pull, and animating large blur radii is the most expensive thing on the page,
+   which is why only headlines carry one. */
+[data-reveal='blur']     { --rv-y: 16px; --rv-blur: 7px; }
+
+/*
+ * The settled state resets the resolved properties, not the variables behind
+ * them.
+ *
+ * Resetting `--rv-y` and friends reads as the tidier expression of the same
+ * idea, and it is silently broken: a call site that overrides a distance passes
+ * it as an inline style, and an inline custom property outranks every rule in
+ * every stylesheet. So the reset lost, and any reveal carrying a bespoke travel
+ * stayed displaced forever. `transform: none` competes with the base rule on
+ * specificity instead, which it wins, and the variables simply stop being read.
+ */
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/*
+ * Revealed after the fact.
+ *
+ * Set when an element is found already behind the reader — see the safety net
+ * in `hooks/useReveal.js`. The content appears, but without the entrance: a
+ * paragraph fading in above the fold, after the reader has scrolled past where
+ * it lives, reads as a rendering fault rather than as a flourish.
+ */
+[data-reveal][data-revealed='instant'],
+[data-reveal-group][data-revealed='instant'] [data-reveal] {
+  transition-duration: 0ms;
+  transition-delay: 0ms;
+}
+
+/*
+ * Cascading groups. The container is what the observer watches; its children
+ * step in behind it, one `--rv-stagger` apart. `--rv-i` is written by
+ * `RevealGroup` as it clones its children, so a twelve-card grid costs one
+ * observer entry and the cascade is arithmetic the compositor already knows how
+ * to do — rather than twelve more subscriptions in JavaScript.
+ *
+ * The group itself never fades. Only its children do, which is what keeps a
+ * cascade reading as items arriving in sequence rather than as a block fading
+ * in with items moving inside it.
+ */
+/*
+ * A descendant selector, not a child one.
+ *
+ * `RevealItem` is almost never a direct child of its group: the usual shape is
+ * group -> `Grid container` -> `Grid item` -> item, because the cascade and the
+ * layout are different concerns and the layout wins the outer position. A `>`
+ * combinator quietly matched nothing in that shape, and 49 of the page's items
+ * sat at `opacity: 0` permanently — the reveal never reached them, so neither
+ * did the reader.
+ */
+[data-reveal-group] [data-reveal] {
+  transition-delay: calc(var(--rv-delay, 0ms) + var(--rv-i, 0) * var(--rv-stagger, 90ms));
+}
+
+[data-reveal-group][data-revealed] [data-reveal] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/*
+ * Reduced motion: presence only, no displacement, no blur.
+ *
+ * This has to neutralise the offsets rather than only silence the transition,
+ * because the hidden state *is* a transform — stopping the transition alone
+ * would leave every reveal permanently displaced and invisible.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    /* `!important` for the same reason the settled state resets resolved
+       properties: a call site's inline `--rv-*` would otherwise reinstate the
+       displacement that this whole block exists to remove. */
+    transform: none !important;
+    filter: none !important;
+    transition-duration: 300ms;
+    transition-delay: 0ms;
+  }
+  [data-reveal-group] [data-reveal] { transition-delay: 0ms; }
+}
+
+/*
+ * ── Meters ─────────────────────────────────────────────────────────────
+ *
+ * Allocation bars fill from the left to a share of their track. They ride the
+ * same shared observer as everything else — the `data-revealed` attribute is
+ * the signal — but they cannot use a `data-reveal` variant, because their settled
+ * state is not "no transform": it is a specific `scaleX` carrying the value the
+ * row is reporting.
+ */
+.ef-meter {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--meter-duration, 1150ms) cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--meter-delay, 0ms);
+}
+
+.ef-meter[data-revealed] {
+  transform: scaleX(var(--meter-fill, 1));
+}
+
+/*
+ * ── Arcs ───────────────────────────────────────────────────────────────
+ *
+ * The donut segments and the radial gauges draw themselves in by retracting a
+ * dash offset. Declared here so the arc's own `stroke-dashoffset` is the only
+ * thing React has to change, once, when the chart comes into view — rather than
+ * a motion value being written on every frame of the draw.
+ */
+.ef-arc {
+  transition:
+    stroke-dashoffset var(--arc-duration, 1250ms) cubic-bezier(0.16, 1, 0.3, 1) var(--arc-delay, 0ms),
+    opacity 350ms ease,
+    stroke-width 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-meter,
+  .ef-arc {
+    transition-duration: 1ms;
+    transition-delay: 0ms;
+  }
+}

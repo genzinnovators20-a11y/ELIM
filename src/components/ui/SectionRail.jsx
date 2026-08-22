@@ -1,27 +1,39 @@
 import { memo } from 'react';
 import Box from '@mui/material/Box';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
 import useActiveSection from '../../hooks/useActiveSection';
 import { scrollToTarget } from '../../hooks/useSmoothScroll';
 import { fontFamilies } from '../../theme/typography';
 
+/** Stable identity, so the hook's effect does not re-run on every render. */
+const EMPTY = [];
+
 /**
  * Fixed left rail listing the anchors of the current page.
  * Desktop only — on smaller viewports the reading order already carries the map.
  */
 function SectionRail({ sections = [] }) {
+  /*
+   * The rail is an extra-large-viewport affordance — below `xl` the reading
+   * order already carries the map, and the CSS hid it. Hiding it in CSS still
+   * mounted it, which meant every phone paid for an IntersectionObserver over
+   * twenty-two anchors and a subscription that could never change anything
+   * anyone could see. Asking first costs one media query.
+   */
+  const shown = useMediaQuery((t) => t.breakpoints.up('xl'), { noSsr: true });
   const ids = sections.map((s) => s.id);
-  const active = useActiveSection(ids);
+  const active = useActiveSection(shown ? ids : EMPTY);
 
-  if (!sections.length) return null;
+  if (!shown || !sections.length) return null;
 
   return (
     <Box
       component="nav"
       aria-label="Section navigation"
       sx={{
-        display: { xs: 'none', xl: 'flex' },
+        display: 'flex',
         position: 'fixed',
         left: 26,
         top: '50%',

@@ -64,7 +64,7 @@ export default function StakingVisualizer() {
                 >
                   <Stack spacing={0.75} alignItems="center">
                     <Box sx={{ width: 62, opacity: 0.95, mb: 0.5 }}>
-                      <BrandArt asset="coin" />
+                      <BrandArt asset="coinSm" />
                     </Box>
                     <AnimatedNumber
                       value={500000000}

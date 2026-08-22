@@ -8,14 +8,11 @@ import Typography from '@mui/material/Typography';
 import CloseRounded from '@mui/icons-material/CloseRounded';
 import ArrowOutwardRounded from '@mui/icons-material/ArrowOutwardRounded';
 import { Link as RouterLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import Logo from '../components/brand/Logo';
 import { scrollToTarget, jumpToTop } from '../hooks/useSmoothScroll';
 import { primaryNav, authNav } from '../constants/nav';
 import { fontFamilies } from '../theme/typography';
-import { easings } from '../theme/tokens';
-
-const MotionBox = motion.create(Box);
+import '../animations/ambient.css';
 
 /**
  * Full-height navigation sheet for tablet and mobile.
@@ -87,11 +84,15 @@ function MobileNav({ open, onClose, activeSection, onHome }) {
             {primaryNav.map((item, i) => {
               const active = activeSection === item.id;
               return (
-                <MotionBox
+                <Box
                   key={item.id}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.06 + i * 0.06, duration: 0.6, ease: easings.luxe }}
+                  className="ef-enter-rise"
+                  /* The sheet slides in from the right, so its entries arrive
+                     along the same axis rather than rising into it. */
+                  style={{
+                    '--enter-delay': `${Math.round((0.06 + i * 0.06) * 1000)}ms`,
+                    '--enter-duration': '600ms',
+                  }}
                 >
                   <Box
                     component={RouterLink}
@@ -131,7 +132,7 @@ function MobileNav({ open, onClose, activeSection, onHome }) {
                       }}
                     />
                   </Box>
-                </MotionBox>
+                </Box>
               );
             })}
           </Stack>

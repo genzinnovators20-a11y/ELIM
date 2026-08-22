@@ -3,7 +3,6 @@ import { Grid, Stack } from '@/components/ui/layout';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import { Link as RouterLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import GradientText from '../components/ui/GradientText';
 import Eyebrow from '../components/ui/Eyebrow';
 import BrandArt from '../components/brand/BrandArt';
@@ -11,9 +10,7 @@ import ForgeRings from '../components/visuals/ForgeRings';
 import GridField from '../components/background/GridField';
 import { hero, elimcoin } from '../constants/content';
 import { fontFamilies } from '../theme/typography';
-import { easings } from '../theme/tokens';
-
-const MotionBox = motion.create(Box);
+import '../animations/ambient.css';
 
 /**
  * Shared chrome for the account routes: a lit brand panel opposite the form.
@@ -56,16 +53,16 @@ export default function AuthLayout({ eyebrow, title, subtitle, children, footer 
                   <Box sx={{ position: 'absolute', inset: '-22%' }}>
                     <ForgeRings />
                   </Box>
-                  <MotionBox
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
+                  <Box
+                    className="ef-float"
+                    style={{ '--float-to': '-10px', '--float-duration': '7.5s' }}
                     sx={{
                       position: 'relative',
                       filter: 'drop-shadow(0 30px 56px rgba(0,0,0,0.72)) drop-shadow(0 0 44px rgba(99,201,236,0.26))',
                     }}
                   >
                     <BrandArt asset="emblem" />
-                  </MotionBox>
+                  </Box>
                 </Box>
 
                 <Stack spacing={2} alignItems="center">
@@ -93,10 +90,9 @@ export default function AuthLayout({ eyebrow, title, subtitle, children, footer 
 
           {/* Form panel */}
           <Grid size={{ xs: 12, lg: 6 }}>
-            <MotionBox
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: easings.luxe }}
+            <Box
+              className="ef-enter-rise"
+              style={{ '--enter-duration': '900ms' }}
               sx={{ maxWidth: 520, mx: { xs: 'auto', lg: 0 } }}
             >
               <Stack spacing={{ xs: 3, md: 4 }}>
@@ -142,7 +138,7 @@ export default function AuthLayout({ eyebrow, title, subtitle, children, footer 
                   </Box>
                 </Typography>
               </Stack>
-            </MotionBox>
+            </Box>
           </Grid>
         </Grid>
       </Container>

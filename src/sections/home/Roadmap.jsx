@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
@@ -8,13 +7,12 @@ import Reveal from '../../components/ui/Reveal';
 import GlassCard from '../../components/ui/GlassCard';
 import IconTile from '../../components/ui/IconTile';
 import GradientText from '../../components/ui/GradientText';
-import { motion, useScroll, useSpring, useReducedMotion } from 'framer-motion';
+import useScrollFill from '../../hooks/useScrollFill';
+import '../../animations/ambient.css';
 import { roadmap } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
 import { layout } from '../../theme/tokens';
-
-const MotionBox = motion.create(Box);
 
 const phaseMeta = [
   { icon: 'engine', accent: 'blue' },
@@ -35,13 +33,7 @@ const { titleLead, titleMiddle, titleTarget } = roadmap;
  * phase is flagged exactly as the document flags it.
  */
 export default function Roadmap() {
-  const trackRef = useRef(null);
-  const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ['start 0.82', 'end 0.55'],
-  });
-  const scaleY = useSpring(scrollYProgress, { stiffness: 90, damping: 30, restDelta: 0.001 });
+  const { trackRef, fillRef } = useScrollFill({ startAt: 0.82, endAt: 0.55, property: '--roadmap-fill' });
 
   return (
     <Section id="roadmap" tone="contrast">
@@ -74,14 +66,18 @@ export default function Roadmap() {
             overflow: 'hidden',
           }}
         >
-          <MotionBox
-            style={reduced ? { scaleY: 1 } : { scaleY }}
+          <Box
+            ref={fillRef}
             sx={{
               width: '100%',
               height: '100%',
               transformOrigin: 'top',
+              transform: 'scaleY(var(--roadmap-fill, 0))',
               background: (t) => t.ef.gradients.goldFill,
               boxShadow: '0 0 22px rgba(212,175,55,0.6)',
+              /* A reader who has asked for reduced motion gets the conductor
+                 whole rather than watching it draw. */
+              '@media (prefers-reduced-motion: reduce)': { transform: 'none' },
             }}
           />
         </Box>
@@ -172,9 +168,8 @@ export default function Roadmap() {
                             background: 'rgba(212,175,55,0.08)',
                           }}
                         >
-                          <MotionBox
-                            animate={reduced ? undefined : { opacity: [1, 0.25, 1] }}
-                            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                          <Box
+                            className="ef-pulse"
                             sx={{
                               width: 6,
                               height: 6,

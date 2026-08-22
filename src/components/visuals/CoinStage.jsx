@@ -2,8 +2,8 @@ import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { keyframes } from '@mui/material/styles';
 import BrandArt from '../brand/BrandArt';
-import ForgeRings from '../visuals/ForgeRings';
-import OrbitRings from '../visuals/OrbitRings';
+import ForgeRings from './ForgeRings';
+import OrbitRings from './OrbitRings';
 
 /** One revolution about the coin's vertical axis — the WebGL coin's own rate. */
 const strike = keyframes`from { transform: rotateY(0deg); } to { transform: rotateY(360deg); }`;
@@ -89,7 +89,7 @@ function CoinStage({ height = 520, sx }) {
             />
 
             <Box sx={{ position: 'absolute', inset: 0, backfaceVisibility: 'hidden', transform: 'translateZ(1px)' }}>
-              <BrandArt asset="coin" priority />
+              <BrandArt asset="coin" />
             </Box>
 
             <Box
@@ -100,7 +100,7 @@ function CoinStage({ height = 520, sx }) {
                 transform: 'rotateY(180deg) translateZ(1px)',
               }}
             >
-              <BrandArt asset="coin" priority />
+              <BrandArt asset="coin" />
             </Box>
           </Box>
 

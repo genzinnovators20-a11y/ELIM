@@ -14,10 +14,12 @@ function GridField({
   majorColor = 'rgba(255,255,255,0.075)',
   mask = 'radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%)',
   sx,
+  ...props
 }) {
   return (
     <Box
       aria-hidden
+      {...props}
       sx={{
         position: 'absolute',
         inset: 0,

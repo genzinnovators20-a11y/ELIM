@@ -1,139 +1,90 @@
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
-import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 import BrandArt from '../brand/BrandArt';
 import ForgeRings from './ForgeRings';
 import MarketPulse from './MarketPulse';
+import usePointerTilt from '../../hooks/usePointerTilt';
 import { fontFamilies } from '../../theme/typography';
+import '../../animations/ambient.css';
 
-const MotionBox = motion.create(Box);
+/**
+ * How far each plane travels across the full width of the rig, in pixels.
+ *
+ * These are the ranges the `useTransform` graph mapped -0.5..0.5 onto, kept
+ * exactly. The coin travels furthest because it is the nearest object: nearer
+ * things displace more as the viewpoint shifts, and that difference is the whole
+ * reason the coin reads as floating in front of the rig rather than as
+ * decoration pinned to it.
+ *
+ * Each is applied as `calc(var(--tilt-x) * N)`, so all seven planes are driven
+ * by the two variables `usePointerTilt` writes — no per-plane subscription, and
+ * nothing to update when the pointer is still.
+ */
+const PLANE = {
+  rigRotate: 18, // degrees across the full sweep, halved either side of centre
+  glow: 72,
+  emblem: 44,
+  emblemY: 28,
+  panel: -32,
+  coin: 68,
+  coinY: 40,
+};
+
+const travel = (axis, px) => `calc(var(--tilt-${axis}, 0) * ${px}px)`;
 
 /**
  * The ELIM FORGE image, mounted in a laser assembly rig and featured at full
  * scale rather than tucked into a card.
  *
- * The whole rig tilts with the pointer on a spring, which is what sells the
- * depth; it is disabled entirely for reduced-motion and coarse pointers.
+ * The whole rig tilts with the pointer, which is what sells the depth; it is
+ * inert for reduced-motion and coarse pointers, where there is no hovering
+ * pointer for it to answer.
  *
  * `showMarketPanel` adds the dark metallic trading-chart mock-up. The spec
  * assigns that mock-up to the ELIMCOIN section, so the masthead runs without
  * it — but the composition is kept here, one prop away.
  */
 function ForgeStage({ showMarketPanel = false }) {
-  const wrapRef = useRef(null);
-  const reduced = useReducedMotion();
-
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const spring = { stiffness: 90, damping: 22, mass: 0.7 };
-  const sx1 = useSpring(px, spring);
-  const sy1 = useSpring(py, spring);
-
-  const rotateY = useTransform(sx1, [-0.5, 0.5], [9, -9]);
-  const rotateX = useTransform(sy1, [-0.5, 0.5], [-7, 7]);
-  const emblemX = useTransform(sx1, [-0.5, 0.5], [-22, 22]);
-  const emblemY = useTransform(sy1, [-0.5, 0.5], [-14, 14]);
-  const panelX = useTransform(sx1, [-0.5, 0.5], [16, -16]);
-  const glowX = useTransform(sx1, [-0.5, 0.5], [-36, 36]);
-  /**
-   * The coin travels further than the emblem it was struck from. Nearer objects
-   * displace more as the viewpoint shifts, so the wider range is what separates
-   * the two planes — the coin stops reading as decoration pinned to the rig and
-   * starts reading as an object floating in front of it.
-   */
-  const coinX = useTransform(sx1, [-0.5, 0.5], [-34, 34]);
-  const coinY = useTransform(sy1, [-0.5, 0.5], [-20, 20]);
-
-  /**
-   * The rect is measured on enter and on viewport change, not on every pointer
-   * event. `getBoundingClientRect()` inside a move handler forces a layout on
-   * each of the dozens of events a second a moving pointer produces.
-   */
-  const rectRef = useRef(null);
-
-  /**
-   * Whether the pointer is over the rig. The scroll/resize refresh below is
-   * gated on it: `getBoundingClientRect()` forces a synchronous layout, and
-   * running it on every scroll event — which momentum scrolling fires
-   * continuously — spends a layout per event on a rect nothing is reading.
-   * Off the rig the rect is left stale; `pointerenter` re-measures before the
-   * first move can use it.
-   */
-  const insideRef = useRef(false);
-
-  const measure = useCallback(() => {
-    if (wrapRef.current) rectRef.current = wrapRef.current.getBoundingClientRect();
-  }, []);
-
-  useEffect(() => {
-    if (reduced) return undefined;
-    const onViewportChange = () => {
-      if (insideRef.current) measure();
-    };
-    window.addEventListener('resize', onViewportChange, { passive: true });
-    window.addEventListener('scroll', onViewportChange, { passive: true });
-    return () => {
-      window.removeEventListener('resize', onViewportChange);
-      window.removeEventListener('scroll', onViewportChange);
-    };
-  }, [measure, reduced]);
-
-  const handleEnter = useCallback(() => {
-    if (reduced) return;
-    insideRef.current = true;
-    measure();
-  }, [measure, reduced]);
-
-  const handleMove = useCallback(
-    (event) => {
-      if (reduced) return;
-      const rect = rectRef.current;
-      if (!rect) return;
-      px.set((event.clientX - rect.left) / rect.width - 0.5);
-      py.set((event.clientY - rect.top) / rect.height - 0.5);
-    },
-    [px, py, reduced],
-  );
-
-  const handleLeave = useCallback(() => {
-    insideRef.current = false;
-    px.set(0);
-    py.set(0);
-  }, [px, py]);
+  const wrapRef = usePointerTilt();
 
   return (
     <Box
       ref={wrapRef}
-      onPointerEnter={handleEnter}
-      onPointerMove={handleMove}
-      onPointerLeave={handleLeave}
       sx={{
         position: 'relative',
         width: '100%',
         aspectRatio: { xs: '1 / 1', md: '1 / 1.02' },
         perspective: '1400px',
+        /* Nothing in the rig is interactive; the tilt is the only reason it
+           listens at all, and that is a fine-pointer affordance. */
         '@media (pointer: coarse)': { pointerEvents: 'none' },
       }}
     >
       {/* Ambient forge light */}
-      <MotionBox
+      <Box
         aria-hidden
-        style={{ x: reduced ? 0 : glowX }}
         sx={{
           position: 'absolute',
           inset: '-14%',
+          transform: `translate3d(${travel('x', PLANE.glow)}, 0, 0)`,
+          /* Painted, not filtered — see the masthead's horizon light. This one
+             also sits inside the tilt rig, so a filtered layer would be
+             re-rasterised as the rig turns under the pointer. */
           background:
-            'radial-gradient(46% 42% at 52% 44%, rgba(76,141,255,0.24) 0%, rgba(31,185,138,0.12) 42%, transparent 72%)',
-          filter: 'blur(36px)',
+            'radial-gradient(46% 42% at 52% 44%, rgba(76,141,255,0.24) 0%, rgba(31,185,138,0.11) 44%, transparent 74%)',
           pointerEvents: 'none',
         }}
       />
 
-      <MotionBox
-        style={reduced ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        sx={{ position: 'absolute', inset: 0 }}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          transformStyle: 'preserve-3d',
+          transform: `rotateY(calc(var(--tilt-x, 0) * ${-PLANE.rigRotate}deg)) rotateX(calc(var(--tilt-y, 0) * ${PLANE.rigRotate}deg))`,
+        }}
       >
         {/* Assembly rig */}
         <Box sx={{ position: 'absolute', inset: { xs: '4%', md: '2%' } }}>
@@ -141,28 +92,37 @@ function ForgeStage({ showMarketPanel = false }) {
         </Box>
 
         {/* Primary branding asset — featured at full scale */}
-        <MotionBox
-          style={reduced ? undefined : { x: emblemX, y: emblemY }}
-          animate={reduced ? undefined : { y: [0, -12, 0] }}
-          transition={reduced ? undefined : { duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
+        {/*
+          The emblem sits on two nested elements rather than one: the outer box
+          carries the pointer parallax, the inner box carries the endless float.
+          A single element cannot hold both, because they are two independent
+          transforms on the same axis and the second would overwrite the first.
+        */}
+        <Box
           sx={{
             position: 'absolute',
             inset: '16%',
-            display: 'grid',
-            placeItems: 'center',
-            filter: 'drop-shadow(0 40px 70px rgba(0,0,0,0.65)) drop-shadow(0 0 60px rgba(99,201,236,0.2))',
+            transform: `translate3d(${travel('x', PLANE.emblem)}, ${travel('y', PLANE.emblemY)}, 0)`,
           }}
         >
-          <BrandArt asset="emblem" priority sx={{ width: '100%' }} />
-        </MotionBox>
+          <Box
+            className="ef-float"
+            style={{ '--float-to': '-12px', '--float-duration': '7.5s' }}
+            sx={{
+              display: 'grid',
+              placeItems: 'center',
+              filter: 'drop-shadow(0 40px 70px rgba(0,0,0,0.65)) drop-shadow(0 0 60px rgba(99,201,236,0.2))',
+            }}
+          >
+            <BrandArt asset="emblem" priority sx={{ width: '100%' }} />
+          </Box>
+        </Box>
 
         {/* Metallic market panel */}
         {showMarketPanel && (
-        <MotionBox
-          style={reduced ? undefined : { x: panelX }}
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.85, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+        <Box
+          className="ef-enter-rise"
+          style={{ '--enter-delay': '850ms', '--enter-duration': '1100ms' }}
           sx={{
             position: 'absolute',
             left: { xs: '-4%', md: '-14%' },
@@ -175,7 +135,8 @@ function ForgeStage({ showMarketPanel = false }) {
             boxShadow:
               '0 1px 0 rgba(255,255,255,0.09) inset, 0 40px 90px -34px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.4)',
             backdropFilter: 'blur(14px)',
-            transform: 'translateZ(60px)',
+            /* No `translateZ`, for the same reason as the coin below. */
+            transform: `translate3d(${travel('x', PLANE.panel)}, 0, 0)`,
           }}
         >
           <Stack
@@ -224,32 +185,43 @@ function ForgeStage({ showMarketPanel = false }) {
           </Stack>
 
           <MarketPulse height={148} />
-        </MotionBox>
+        </Box>
         )}
 
         {/* Gold coin — the forged output, drifting free of the rig */}
-        <MotionBox
-          style={reduced ? undefined : { x: coinX, y: coinY }}
+        <Box
           sx={{
             position: 'absolute',
             right: { xs: '-2%', md: '-4%' },
             top: { xs: '2%', md: '4%' },
             width: { xs: '26%', md: '25%' },
-            transform: 'translateZ(90px)',
+            /*
+             * No `translateZ`. The source carried `translateZ(90px)` here, but
+             * framer-motion owned this element's `transform` and overwrote it,
+             * so the shipped site has never rendered it — and under the rig's
+             * `perspective: 1400px` reinstating it enlarges the coin by 6.9%,
+             * which is a visible change to a mark the brand is built on. The
+             * depth read comes from the parallax range anyway: the coin travels
+             * further than the emblem behind it, which is what separates the
+             * planes. See `PLANE`.
+             */
+            transform: `translate3d(${travel('x', PLANE.coin)}, ${travel('y', PLANE.coinY)}, 0)`,
           }}
         >
-          <MotionBox
-            initial={{ opacity: 0, scale: 0.78 }}
-            animate={reduced ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1, y: [0, 14, 0] }}
-            transition={
-              reduced
-                ? { duration: 0.5 }
-                : {
-                    opacity: { delay: 0.72, duration: 0.8 },
-                    scale: { delay: 0.72, duration: 1, ease: [0.16, 1, 0.3, 1] },
-                    y: { duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 1.7 },
-                  }
-            }
+          {/*
+            Entrance and drift on two nested elements, not one.
+            Both animate `transform`, and an element resolves a single
+            `animation-name` — stacking the classes silently dropped whichever
+            rule lost the cascade, which killed the coin's drift outright.
+          */}
+          <Box className="ef-enter-stage" style={{ '--enter-delay': '720ms', '--enter-duration': '1000ms' }}>
+          <Box
+            className="ef-float"
+            style={{
+              '--float-to': '14px',
+              '--float-duration': '9s',
+              '--float-delay': '1.7s',
+            }}
             sx={{
               position: 'relative',
               /**
@@ -262,7 +234,7 @@ function ForgeStage({ showMarketPanel = false }) {
                 'drop-shadow(0 5px 9px rgba(0,0,0,0.55)) drop-shadow(0 24px 42px rgba(0,0,0,0.7)) drop-shadow(0 0 34px rgba(212,175,55,0.32))',
             }}
           >
-            <BrandArt asset="coin" priority />
+            <BrandArt asset="coinSm" priority />
 
             {/*
               Specular sweep — a raking highlight crossing the struck face.
@@ -270,45 +242,35 @@ function ForgeStage({ showMarketPanel = false }) {
               so the sheen is confined to the metal instead of streaking across
               the background behind it.
             */}
-            {!reduced && (
+            <Box
+              aria-hidden
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                clipPath: 'circle(47% at 50% 50%)',
+                pointerEvents: 'none',
+                zIndex: 1,
+              }}
+            >
               <Box
-                aria-hidden
+                className="ef-sheen"
                 sx={{
                   position: 'absolute',
-                  inset: 0,
-                  clipPath: 'circle(47% at 50% 50%)',
-                  pointerEvents: 'none',
-                  zIndex: 1,
+                  top: '-14%',
+                  left: 0,
+                  width: '38%',
+                  height: '128%',
+                  background:
+                    'linear-gradient(100deg, transparent 0%, rgba(255,250,235,0.4) 46%, rgba(255,255,255,0.6) 52%, transparent 100%)',
+                  filter: 'blur(5px)',
+                  mixBlendMode: 'screen',
                 }}
-              >
-                <MotionBox
-                  animate={{ x: ['-160%', '340%'], opacity: [0, 0.55, 0.55, 0] }}
-                  transition={{
-                    duration: 2.6,
-                    times: [0, 0.18, 0.72, 1],
-                    ease: 'easeInOut',
-                    repeat: Infinity,
-                    repeatDelay: 6.2,
-                    delay: 2.1,
-                  }}
-                  sx={{
-                    position: 'absolute',
-                    top: '-14%',
-                    left: 0,
-                    width: '38%',
-                    height: '128%',
-                    background:
-                      'linear-gradient(100deg, transparent 0%, rgba(255,250,235,0.4) 46%, rgba(255,255,255,0.6) 52%, transparent 100%)',
-                    transform: 'skewX(-16deg)',
-                    filter: 'blur(5px)',
-                    mixBlendMode: 'screen',
-                  }}
-                />
-              </Box>
-            )}
-          </MotionBox>
-        </MotionBox>
-      </MotionBox>
+              />
+            </Box>
+          </Box>
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }

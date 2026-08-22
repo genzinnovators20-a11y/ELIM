@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import useCountUp from '../../hooks/useCountUp';
 import { fontFamilies } from '../../theme/typography';
@@ -21,12 +21,20 @@ function AnimatedNumber({
   sx,
   ...props
 }) {
-  const { ref, value: current } = useCountUp(value, { duration, decimals, delay });
-  const display = decimals > 0 ? current.toFixed(decimals) : format(Math.round(current));
+  /*
+   * The affix spans are rendered by React; the figure between them is written by
+   * the frame loop. Splitting it this way is what lets the count run without a
+   * render per frame — see `useCountUp` — and it keeps the prefix and suffix
+   * under React's control, where they belong.
+   */
+  const formatValue = useCallback(
+    (n) => (decimals > 0 ? n.toFixed(decimals) : format(Math.round(n))),
+    [decimals, format],
+  );
+  const { ref } = useCountUp(value, { duration, decimals, delay, format: formatValue });
 
   return (
     <Box
-      ref={ref}
       component={component}
       sx={{
         fontFamily: fontFamilies.display,
@@ -38,7 +46,13 @@ function AnimatedNumber({
       {...props}
     >
       {prefix}
-      {display}
+      {/*
+        Deliberately childless: `useCountUp` writes this element's text, and it
+        can only do that safely if React has no opinion about what belongs here.
+        `tabular-nums` above keeps the glyph width fixed, so the figure changing
+        every frame never reflows the line around it.
+      */}
+      <Box component="span" ref={ref} />
       {suffix}
     </Box>
   );

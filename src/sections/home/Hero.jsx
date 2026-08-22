@@ -3,7 +3,6 @@ import { Grid, Stack } from '@/components/ui/layout';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
-import { motion, useReducedMotion } from 'framer-motion';
 import KeyboardArrowDownRounded from '@mui/icons-material/KeyboardArrowDownRounded';
 import ForgeStage from '../../components/visuals/ForgeStage';
 import GradientText from '../../components/ui/GradientText';
@@ -11,10 +10,7 @@ import CTAButton from '../../components/ui/CTAButton';
 import { scrollToTarget } from '../../hooks/useSmoothScroll';
 import { hero, elimcoin } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
-import { easings } from '../../theme/tokens';
-
-const MotionBox = motion.create(Box);
-const MotionTypography = motion.create(Typography);
+import '../../animations/ambient.css';
 
 /**
  * Entrance choreography, in seconds.
@@ -25,58 +21,37 @@ const MotionTypography = motion.create(Typography);
  * arriving at ~2.0s and the coin at ~2.2s, which spends the entire first
  * impression on watching the page assemble itself.
  *
- * Everything is now settled by ~1.5s, leaving the rest of the opening seconds
- * for the reader rather than for the animation.
+ * The whole timeline was then compressed by about 40%. The grouping is what
+ * carries the read, and it survives the compression intact — but the previous
+ * schedule settled at ~1.5s, and the largest block of copy in the first viewport
+ * did not begin to appear until 600ms in. On a phone that made the site's own
+ * entrance the thing setting Largest Contentful Paint: the page was ready and
+ * was choosing to withhold itself. Everything now lands by ~0.9s. Watch the two
+ * side by side and the difference reads as confidence rather than as speed.
+ *
+ * These used to be framer-motion variants driven from JavaScript. They are the
+ * same shape on the same curve, declared as CSS animation delays — see
+ * `animations/ambient.css`. The masthead is the first thing React commits, so
+ * this is the one piece of motion that competes directly with first paint;
+ * handing it to the compositor means the entrance no longer has to wait its turn
+ * behind an animation runtime mounting itself.
  */
 const CUE = {
-  headline: 0.05,
-  headlineStep: 0.075,
-  badge: 0.3,
-  tagline: 0.37,
-  rule: 0.44,
-  statement: 0.52,
-  lede: 0.6,
-  actions: 0.7,
-  specs: 0.78,
-  stage: 0.18,
-  coin: 0.72,
-  cue: 1.5,
+  headline: 0.03,
+  headlineStep: 0.045,
+  badge: 0.18,
+  tagline: 0.22,
+  rule: 0.26,
+  statement: 0.31,
+  lede: 0.36,
+  actions: 0.42,
+  specs: 0.47,
+  stage: 0.1,
+  cue: 0.9,
 };
 
-/**
- * Supporting elements: displacement only, no blur. Animating `filter` forces a
- * repaint per frame, and on eight small elements it bought nothing the opacity
- * ramp was not already doing.
- */
-const rise = {
-  hidden: { opacity: 0, y: 16 },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: easings.luxe, delay },
-  }),
-};
-
-/** The headline keeps its lens-resolving blur — one place, where it reads. */
-const riseHead = {
-  hidden: { opacity: 0, y: 24, filter: 'blur(8px)' },
-  visible: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.95, ease: easings.luxe, delay },
-  }),
-};
-
-/**
- * Reduced motion: presence only. The site-wide CSS reset silences *CSS*
- * transitions, but Framer drives these from JavaScript and would otherwise keep
- * translating and blurring for a reader who has asked it not to.
- */
-const still = {
-  hidden: { opacity: 0 },
-  visible: (delay = 0) => ({ opacity: 1, transition: { duration: 0.3, delay: Math.min(delay, 0.3) } }),
-};
+/** `--enter-delay`, in the form the stylesheet expects. */
+const cue = (seconds) => ({ '--enter-delay': `${Math.round(seconds * 1000)}ms` });
 
 /** Fact strip — drawn straight from the published token specifications. */
 const specStrip = [elimcoin.specs[2], elimcoin.specs[3], elimcoin.specs[4]];
@@ -87,10 +62,7 @@ const specStrip = [elimcoin.specs[2], elimcoin.specs[3], elimcoin.specs[4]];
  * in the laser assembly rig.
  */
 export default function Hero() {
-  const reduced = useReducedMotion();
   const words = hero.title.split(' ');
-  const enter = reduced ? still : rise;
-  const enterHead = reduced ? still : riseHead;
 
   return (
     <Box
@@ -118,9 +90,12 @@ export default function Hero() {
           transform: 'translateX(-50%)',
           width: 'min(1500px, 130vw)',
           height: 'min(900px, 92vh)',
+          /* A diffuse glow, painted rather than filtered. `blur(20px)` over a
+             1500x900 box is one of the largest single rasterisations on the
+             page and it lands squarely in the first paint; the gradient's own
+             falloff is what the eye was reading anyway. */
           background:
-            'radial-gradient(50% 50% at 50% 50%, rgba(76,141,255,0.16) 0%, rgba(31,185,138,0.08) 44%, transparent 72%)',
-          filter: 'blur(20px)',
+            'radial-gradient(50% 50% at 50% 50%, rgba(76,141,255,0.16) 0%, rgba(31,185,138,0.075) 46%, transparent 74%)',
           pointerEvents: 'none',
         }}
       />
@@ -153,25 +128,23 @@ export default function Hero() {
                   }}
                 >
                   {words.map((word, i) => (
-                    <MotionBox
+                    <Box
                       key={word}
                       component="span"
-                      custom={CUE.headline + i * CUE.headlineStep}
-                      variants={enterHead}
-                      initial="hidden"
-                      animate="visible"
+                      className="ef-enter-head"
+                      style={cue(CUE.headline + i * CUE.headlineStep)}
                       sx={{ display: 'inline-block' }}
                     >
                       <GradientText fill={i === 0 ? 'ice' : 'gold'} component="span">
                         {word}
                       </GradientText>
-                    </MotionBox>
+                    </Box>
                   ))}
                 </Typography>
               </Box>
 
               {/* BNB SMART CHAIN ECOSYSTEM */}
-              <MotionBox custom={CUE.badge} variants={enter} initial="hidden" animate="visible">
+              <Box className="ef-enter-rise" style={cue(CUE.badge)}>
                 <Stack
                   direction="row"
                   spacing={1.5}
@@ -212,14 +185,12 @@ export default function Hero() {
                     {hero.chain}
                   </Typography>
                 </Stack>
-              </MotionBox>
+              </Box>
 
               {/* Tagline */}
-              <MotionTypography
-                custom={CUE.tagline}
-                variants={enter}
-                initial="hidden"
-                animate="visible"
+              <Typography
+                className="ef-enter-rise"
+                style={cue(CUE.tagline)}
                 component="p"
                 sx={{
                   fontFamily: fontFamilies.mono,
@@ -232,9 +203,9 @@ export default function Hero() {
                 }}
               >
                 {hero.tagline}
-              </MotionTypography>
+              </Typography>
 
-              <MotionBox custom={CUE.rule} variants={enter} initial="hidden" animate="visible">
+              <Box className="ef-enter-rise" style={cue(CUE.rule)}>
                 <Box
                   aria-hidden
                   sx={{
@@ -245,51 +216,47 @@ export default function Hero() {
                     boxShadow: '0 0 16px rgba(212,175,55,0.5)',
                   }}
                 />
-              </MotionBox>
+              </Box>
               </Stack>
 
               {/* ── Message ────────────────────────────────────────── */}
               <Stack spacing={{ xs: 2.5, md: 3 }}>
               {/* Institutional Power. Decentralised Freedom. */}
-              <MotionTypography
-                custom={CUE.statement}
-                variants={enter}
-                initial="hidden"
-                animate="visible"
+              <Typography
+                className="ef-enter-rise"
+                style={cue(CUE.statement)}
                 variant="quote"
                 component="p"
               >
                 {hero.statement}
-              </MotionTypography>
+              </Typography>
 
               {/* Positioning paragraph */}
-              <MotionTypography
-                custom={CUE.lede}
-                variants={enter}
-                initial="hidden"
-                animate="visible"
+              <Typography
+                className="ef-enter-rise"
+                style={cue(CUE.lede)}
                 variant="subtitle1"
                 component="p"
                 sx={{ maxWidth: 640 }}
               >
                 {hero.lede}
-              </MotionTypography>
+              </Typography>
               </Stack>
 
               {/* ── Action ─────────────────────────────────────────── */}
               <Stack spacing={{ xs: 3, md: 3.5 }}>
               {/* Actions */}
-              <MotionBox custom={CUE.actions} variants={enter} initial="hidden" animate="visible">
+              <Box className="ef-enter-rise" style={cue(CUE.actions)}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.75} sx={{ pt: 1 }}>
                   <CTAButton onClick={() => scrollToTarget('#elimcoin')}>{elimcoin.ctaPrimary}</CTAButton>
                   <CTAButton variant="outlined" magnetic={false} showArrow={false} href="#">
                     {elimcoin.ctaSecondary}
                   </CTAButton>
                 </Stack>
-              </MotionBox>
+              </Box>
 
               {/* Specification strip */}
-              <MotionBox custom={CUE.specs} variants={enter} initial="hidden" animate="visible">
+              <Box className="ef-enter-rise" style={cue(CUE.specs)}>
                 <Stack
                   direction="row"
                   divider={<Divider orientation="vertical" flexItem sx={{ opacity: 0.5 }} />}
@@ -318,31 +285,36 @@ export default function Hero() {
                     </Box>
                   ))}
                 </Stack>
-              </MotionBox>
+              </Box>
               </Stack>
             </Stack>
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5.4 }}>
-            <MotionBox
-              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.94 }}
-              animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
-              transition={{ duration: reduced ? 0.4 : 1.25, ease: easings.luxe, delay: reduced ? 0 : CUE.stage }}
+            <Box
+              className="ef-enter-stage"
+              style={cue(CUE.stage)}
               sx={{ px: { xs: 2, sm: 6, md: 10, lg: 0 } }}
             >
               <ForgeStage />
-            </MotionBox>
+            </Box>
           </Grid>
         </Grid>
       </Container>
 
-      {/* Scroll cue */}
-      {!reduced && (
-        <MotionBox
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: CUE.cue, duration: 0.9 }}
-          sx={{
+      {/*
+        Scroll cue.
+
+        Rendered unconditionally now. It used to be gated on a JavaScript read of
+        the motion preference, which meant readers who had asked for reduced
+        motion lost the affordance entirely rather than losing its animation —
+        the stylesheet stills the nudge and shortens the fade, and the cue itself
+        stays where it is and stays clickable.
+      */}
+      <Box
+        className="ef-enter-fade"
+        style={cue(CUE.cue)}
+        sx={{
             position: 'absolute',
             bottom: 18,
             left: '50%',
@@ -384,16 +356,11 @@ export default function Hero() {
             <Typography variant="overline" sx={{ fontSize: '0.6875rem', color: 'inherit' }}>
               Scroll
             </Typography>
-            <MotionBox
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-              sx={{ display: 'grid', placeItems: 'center' }}
-            >
+            <Box className="ef-nudge" sx={{ display: 'grid', placeItems: 'center' }}>
               <KeyboardArrowDownRounded sx={{ fontSize: 20 }} />
-            </MotionBox>
+            </Box>
           </Box>
-        </MotionBox>
-      )}
+      </Box>
     </Box>
   );
 }

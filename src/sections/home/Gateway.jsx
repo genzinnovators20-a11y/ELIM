@@ -126,7 +126,7 @@ export default function Gateway() {
                   filter: 'drop-shadow(0 24px 44px rgba(0,0,0,0.65)) drop-shadow(0 0 32px rgba(212,175,55,0.32))',
                 }}
               >
-                <BrandArt asset="coin" />
+                <BrandArt asset="coinSm" />
               </Box>
             </GatewayCard>
           </Reveal>

@@ -1,0 +1,10 @@
+                 0s      1s      2s      3s      4s      5s      6s      7s      8s
+                 |-------|-------|-------|-------|-------|-------|-------|-------|
+HTML             #
+React + MUI       ###
+parse & execute      ...
+page code               #
+web fonts                 ######
+coin artwork                  ####
+render                            .................
+                                                   ^ masthead visible -- 4290 ms

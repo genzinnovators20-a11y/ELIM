@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import { Stack } from '@/components/ui/layout';
 import Button from '@mui/material/Button';
@@ -6,15 +6,12 @@ import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import MenuRounded from '@mui/icons-material/MenuRounded';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import Logo from '../components/brand/Logo';
 import MobileNav from './MobileNav';
 import useActiveSection from '../hooks/useActiveSection';
 import { scrollToTarget, jumpToTop } from '../hooks/useSmoothScroll';
 import { primaryNav, authNav, navSectionIds } from '../constants/nav';
 import { fontFamilies } from '../theme/typography';
-
-const MotionBox = motion.create(Box);
 
 function NavItem({ item, active, onActivate }) {
   return (
@@ -44,13 +41,18 @@ function NavItem({ item, active, onActivate }) {
         Indicator rail.
 
         Centring is done by layout, never by a transform on the indicator
-        itself. `layoutId` hands ownership of that element's `transform` to
-        framer-motion's shared-layout projection, which writes its own value
-        while animating and `transform: none` once it settles — silently
-        deleting a CSS `translateX(-50%)` and leaving the bar half its own
-        width to the right of centre from the first section change onward.
-        A flex row plus a fixed-size slot gives the same centring with no
-        transform to lose, at any viewport width, with no measured pixels.
+        itself: a flex row plus a fixed-size slot centres the bar at any
+        viewport width with no measured pixels.
+
+        The gold bar used to be a single element that framer-motion's
+        shared-layout projection flew between entries. That is a lovely effect
+        and it cost the whole animation runtime to be resident for it. Every
+        entry now owns its own bar and fades and scales it in place; the eye
+        reads a marker moving along the rail either way, because the entries are
+        adjacent and the crossfade is faster than the saccade between them.
+
+        `scaleX` grows the bar out of its own centre, so the two ends arrive
+        together rather than the bar unrolling from the left.
       */}
       <Box
         aria-hidden
@@ -77,19 +79,18 @@ function NavItem({ item, active, onActivate }) {
               transition: (t) => `opacity 380ms ${t.ef.easings.css.luxe}, transform 380ms ${t.ef.easings.css.luxe}`,
             }}
           />
-          {active && (
-            <MotionBox
-              layoutId="nav-active"
-              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: 999,
-                background: (t) => t.ef.gradients.goldFill,
-                boxShadow: '0 0 12px rgba(212,175,55,0.7)',
-              }}
-            />
-          )}
+          <Box
+            sx={(t) => ({
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 999,
+              background: t.ef.gradients.goldFill,
+              boxShadow: '0 0 12px rgba(212,175,55,0.7)',
+              opacity: active ? 1 : 0,
+              transform: active ? 'scaleX(1)' : 'scaleX(0.3)',
+              transition: `opacity 260ms ${t.ef.easings.css.soft}, transform 380ms ${t.ef.easings.css.luxe}`,
+            })}
+          />
         </Box>
       </Box>
     </Box>
@@ -110,12 +111,38 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastPath, setLastPath] = useState(null);
   const { pathname } = useLocation();
-  const { scrollY } = useScroll();
 
   const onHome = pathname === '/';
   const activeSection = useActiveSection(navSectionIds);
 
-  useMotionValueEvent(scrollY, 'change', (v) => setScrolled(v > 24));
+  /*
+   * The bar gains its glass once the page has moved off the top.
+   *
+   * One passive listener with a hysteresis band, rather than framer-motion's
+   * `useScroll` + `useMotionValueEvent`. The band matters more than the
+   * listener: without it, a reader parked at exactly 24px — which momentum
+   * scrolling makes easy to land on — toggles `backdrop-filter: blur(22px)`
+   * across the full width of the viewport on alternate frames, and each toggle
+   * is a fresh backdrop rasterisation. React state is only written when the
+   * answer actually changes.
+   */
+  useEffect(() => {
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      const y = window.scrollY;
+      setScrolled((was) => (was ? y > 12 : y > 32));
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+    read();
+    window.addEventListener('scroll', schedule, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
 
   // Close the sheet whenever the route changes — including browser back/forward,
   // which never passes through a link's onClick. Adjusting state during render

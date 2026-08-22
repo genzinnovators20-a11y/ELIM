@@ -4,18 +4,17 @@ import { Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import { motion, useReducedMotion } from 'framer-motion';
 import Section from '../../components/ui/Section';
 import Reveal from '../../components/ui/Reveal';
+import useReveal from '../../hooks/useReveal';
 import Eyebrow from '../../components/ui/Eyebrow';
 import Icon from '../../components/ui/Icon';
 import BrandArt from '../../components/brand/BrandArt';
 import { industries } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
-import { easings, layout } from '../../theme/tokens';
-
-const MotionPath = motion.path;
+import { layout } from '../../theme/tokens';
+import '../../animations/ambient.css';
 
 /** Node angles on a 100×100 field, for viewports wide enough to hold the ring. */
 const ANGLES = [202, 338, 118, 62];
@@ -58,7 +57,7 @@ const NARROW_NODES = [
  */
 export default function EcosystemFlow() {
   const [active, setActive] = useState(null);
-  const reduced = useReducedMotion();
+  const revealRef = useReveal();
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
   const nodes = isNarrow ? NARROW_NODES : ANGLES.map(toXY);
@@ -125,22 +124,21 @@ export default function EcosystemFlow() {
                     vectorEffect="non-scaling-stroke"
                     style={{ transition: 'stroke-width 380ms cubic-bezier(0.16,1,0.3,1)' }}
                   />
-                  {!reduced && (
-                    <MotionPath
-                      d={d}
-                      fill="none"
-                      stroke={alphaOf(item.accent, 1)}
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
-                      pathLength={1}
-                      strokeDasharray="0.06 0.94"
-                      initial={{ strokeDashoffset: 1 }}
-                      animate={{ strokeDashoffset: 0 }}
-                      transition={{ duration: 3.4, repeat: Infinity, ease: 'linear', delay: i * 0.7 }}
-                      style={{ filter: `drop-shadow(0 0 5px ${alphaOf(item.accent, 0.9)})` }}
-                    />
-                  )}
+                  <path
+                    className="ef-flow"
+                    d={d}
+                    fill="none"
+                    stroke={alphaOf(item.accent, 1)}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                    pathLength={1}
+                    strokeDasharray="0.06 0.94"
+                    style={{
+                      '--flow-delay': `${i * 0.7}s`,
+                      filter: `drop-shadow(0 0 5px ${alphaOf(item.accent, 0.9)})`,
+                    }}
+                  />
                 </g>
               );
             })}
@@ -158,12 +156,10 @@ export default function EcosystemFlow() {
             }}
           >
             <Box
-              component={motion.div}
-              animate={reduced ? undefined : { scale: [1, 1.04, 1] }}
-              transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="ef-breathe"
               sx={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.75)) drop-shadow(0 0 40px rgba(212,175,55,0.34))' }}
             >
-              <BrandArt asset="coin" />
+              <BrandArt asset="coinSm" />
             </Box>
             <Typography
               sx={{
@@ -205,11 +201,9 @@ export default function EcosystemFlow() {
                 }}
               >
                 <Stack
-                  component={motion.div}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.8, ease: easings.luxe, delay: 0.25 + i * 0.11 }}
+                  data-reveal="scale"
+                  ref={revealRef}
+                  style={{ '--rv-scale': 0.8, '--rv-duration': '800ms', '--rv-delay': `${Math.round((0.25 + i * 0.11) * 1000)}ms` }}
                   spacing={1.25}
                   alignItems="center"
                   sx={{

@@ -18,13 +18,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!--
-      The masthead emblem is the Largest Contentful Paint element. It is rendered
-      by a lazily-loaded route, so the preload scanner would not otherwise see it
-      until the Home chunk has downloaded, parsed and run — the fetch is started
-      here instead so it overlaps the JavaScript rather than queueing behind it.
+      The masthead emblem is the Largest Contentful Paint element, and it is now
+      genuinely the first thing painted: Home is part of the entry bundle and the
+      <img> is in its first render, so this preload is consumed the moment React
+      commits rather than sitting in the cache for a second waiting for a probe.
+
+      The build injects the font and chunk preloads immediately below this line — see
+      `injectCriticalPreloads` in vite.config.js.
     -->
     <link rel="preload" as="image" href="/brand/elimcoin-blue.webp" type="image/webp" fetchpriority="high" />
-    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Open Graph -->
@@ -84,36 +86,37 @@
     </script>
 
     <style>
-      /* First-paint shell — removed by the app once React mounts. */
-      html { background: #05070a; }
-      body { margin: 0; background: #05070a; }
-      #boot {
-        position: fixed;
-        inset: 0;
-        display: grid;
-        place-items: center;
+      /*
+       * First paint, before a byte of the application has run.
+       *
+       * This used to also carry a full-screen overlay with a spinning ring,
+       * which React removed once it had committed. The intent was reassurance;
+       * the effect was the opposite. The overlay *was* the First Contentful
+       * Paint, so the metric reported the spinner rather than the page, and it
+       * held a lid over the masthead until React had finished — then spent a
+       * further 520ms fading out over content that was already there. A visitor
+       * on a throttled phone watched a spinner for two seconds and then a fade.
+       *
+       * With Home in the entry bundle and the emblem in its first render there
+       * is nothing left to wait for, so the shell is now just the ground: the
+       * obsidian the design sits on, painted from the HTML. The next thing the
+       * reader sees is the masthead itself.
+       */
+      html {
         background: #05070a;
-        z-index: 9999;
-        transition: opacity 520ms ease, visibility 520ms ease;
+        /* The dark ground must apply before any stylesheet lands, or the
+           browser paints its own white default first and the entrance reads as
+           a flash. */
+        color-scheme: dark;
       }
-      #boot[data-hidden='true'] { opacity: 0; visibility: hidden; }
-      #boot .ring {
-        width: 56px;
-        height: 56px;
-        border-radius: 999px;
-        border: 1px solid rgba(212, 175, 55, 0.18);
-        border-top-color: rgba(212, 175, 55, 0.85);
-        animation: boot-spin 900ms linear infinite;
-      }
-      @keyframes boot-spin { to { transform: rotate(360deg); } }
-      @media (prefers-reduced-motion: reduce) {
-        #boot .ring { animation-duration: 2400ms; }
+      body {
+        margin: 0;
+        background: #05070a;
       }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <div id="boot" aria-hidden="true"><div class="ring"></div></div>
     <noscript>
       <div style="color:#edf1f6;font-family:system-ui,sans-serif;padding:48px;max-width:720px;margin:0 auto">
         <h1>ELIM FORGE</h1>

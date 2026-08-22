@@ -4,18 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// Self-hosted typefaces — no third-party font CDN, no render-blocking request.
-import '@fontsource-variable/sora';
-import '@fontsource-variable/manrope';
-import '@fontsource-variable/jetbrains-mono/wght.css';
-import '@fontsource/instrument-serif/latin-400.css';
+// Self-hosted typefaces — no third-party font CDN, latin only, preloaded by the
+// build so they are in flight beside the JavaScript rather than behind it.
+import './theme/fonts.css';
 
 import theme from './theme';
 import App from './App';
 
-const root = createRoot(document.getElementById('root'));
-
-root.render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider theme={theme} defaultMode="dark">
       <CssBaseline />
@@ -25,12 +21,3 @@ root.render(
     </ThemeProvider>
   </StrictMode>,
 );
-
-// Retire the first-paint shell once React has committed.
-const boot = document.getElementById('boot');
-if (boot) {
-  requestAnimationFrame(() => {
-    boot.dataset.hidden = 'true';
-    window.setTimeout(() => boot.remove(), 640);
-  });
-}

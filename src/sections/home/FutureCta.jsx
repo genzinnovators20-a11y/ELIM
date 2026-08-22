@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import { Grid, Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
-import { motion, useReducedMotion } from 'framer-motion';
 import Section from '../../components/ui/Section';
 import Reveal from '../../components/ui/Reveal';
 import Eyebrow from '../../components/ui/Eyebrow';
@@ -15,8 +14,7 @@ import GridField from '../../components/background/GridField';
 import { scrollToTarget } from '../../hooks/useSmoothScroll';
 import { futureCta } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
-
-const MotionBox = motion.create(Box);
+import '../../animations/ambient.css';
 
 /**
  * Closing call.
@@ -26,7 +24,6 @@ const MotionBox = motion.create(Box);
  * treatment, so the claim and its visualisation cannot drift apart.
  */
 export default function FutureCta() {
-  const reduced = useReducedMotion();
 
   return (
     <Section id="future" tone="contrast" density="spacious" sx={{ overflow: 'hidden' }}>
@@ -134,13 +131,13 @@ export default function FutureCta() {
                   ariaLabel="A 500M ELM staking pool, half of the 1 billion ELM total supply"
                 >
                   <Stack spacing={0.5} alignItems="center">
-                    <MotionBox
-                      animate={reduced ? undefined : { y: [0, -5, 0] }}
-                      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                    <Box
+                      className="ef-float"
+                      style={{ '--float-to': '-5px', '--float-duration': '6s' }}
                       sx={{ width: 52, mb: 0.5 }}
                     >
-                      <BrandArt asset="coin" />
-                    </MotionBox>
+                      <BrandArt asset="coinSm" />
+                    </Box>
                     <Typography
                       sx={{
                         fontFamily: fontFamilies.display,

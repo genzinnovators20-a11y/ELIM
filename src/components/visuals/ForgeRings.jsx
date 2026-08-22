@@ -62,9 +62,11 @@ function ForgeRings({ laserColor = 'rgba(99, 201, 236, 0.9)', sx }) {
           position: 'absolute',
           inset: '14%',
           borderRadius: '50%',
+          /* The pulse animates `scale`, so a filter here would be re-rasterised
+             on every frame of a 7s loop — and this component is instantiated
+             four times across the page. The gradient carries the softness. */
           background:
-            'radial-gradient(circle at 50% 46%, rgba(99,201,236,0.2) 0%, rgba(76,141,255,0.1) 38%, transparent 68%)',
-          filter: 'blur(18px)',
+            'radial-gradient(circle at 50% 46%, rgba(99,201,236,0.2) 0%, rgba(76,141,255,0.095) 40%, transparent 70%)',
           animation: `${pulse} 7s ease-in-out infinite`,
           '@media (prefers-reduced-motion: reduce)': { animation: 'none', opacity: 0.5 },
         }}

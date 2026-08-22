@@ -1,11 +1,8 @@
 import { useMemo, useState, useId } from 'react';
 import Box from '@mui/material/Box';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
+import useInView from '../../hooks/useInView';
 import { getAccent, alphaOf } from '../../utils/accents';
-import { easings } from '../../theme/tokens';
-
-const MotionCircle = motion.circle;
 
 const polar = (cx, cy, r, angle) => ({
   x: cx + r * Math.cos((angle - 90) * (Math.PI / 180)),
@@ -32,7 +29,6 @@ export default function DonutChart({
   const uid = useId().replace(/:/g, '');
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
-  const reduced = useReducedMotion();
   const [internalActive, setInternalActive] = useState(null);
 
   const active = activeIndex ?? internalActive;
@@ -112,8 +108,9 @@ export default function DonutChart({
           const isActive = active === seg.index;
           const dimmed = active != null && !isActive;
           return (
-            <MotionCircle
+            <circle
               key={seg.index}
+              className="ef-arc"
               cx={size / 2}
               cy={size / 2}
               r={radius}
@@ -122,21 +119,16 @@ export default function DonutChart({
               strokeWidth={isActive ? thickness + 8 : thickness}
               strokeLinecap="butt"
               strokeDasharray={`${seg.length} ${circumference}`}
-              initial={{ strokeDashoffset: seg.offset + seg.length, opacity: 0 }}
-              animate={
-                inView || reduced
-                  ? { strokeDashoffset: seg.offset, opacity: dimmed ? 0.28 : 1 }
-                  : undefined
-              }
-              transition={{
-                strokeDashoffset: { duration: reduced ? 0 : 1.25, ease: easings.luxe, delay: reduced ? 0 : 0.12 + seg.index * 0.09 },
-                opacity: { duration: 0.35 },
-                strokeWidth: { duration: 0.35 },
-              }}
+              /* Each slice sweeps out from its own start point as the chart
+                 comes into view, then holds. React writes these two attributes
+                 once, when `inView` flips; the draw itself is the transition
+                 declared on `.ef-arc`. */
+              strokeDashoffset={inView ? seg.offset : seg.offset + seg.length}
+              opacity={inView ? (dimmed ? 0.28 : 1) : 0}
               style={{
                 cursor: 'pointer',
+                '--arc-delay': `${Math.round((0.12 + seg.index * 0.09) * 1000)}ms`,
                 filter: isActive ? `drop-shadow(0 0 16px ${alphaOf(seg.color, 0.65)})` : 'none',
-                transition: 'stroke-width 380ms cubic-bezier(0.16,1,0.3,1)',
               }}
               onMouseEnter={() => setActive(seg.index)}
               onMouseLeave={() => setActive(null)}

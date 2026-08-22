@@ -3,26 +3,14 @@ import { Stack } from '@/components/ui/layout';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import BoltOutlined from '@mui/icons-material/BoltOutlined';
-import { motion } from 'framer-motion';
 import GradientText from '../../components/ui/GradientText';
 import BrandArt from '../../components/brand/BrandArt';
 import ForgeRings from '../../components/visuals/ForgeRings';
 import Section from '../../components/ui/Section';
 import { ecosystem } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
-import { easings } from '../../theme/tokens';
-
-const MotionBox = motion.create(Box);
-
-const rise = {
-  hidden: { opacity: 0, y: 26, filter: 'blur(9px)' },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 1, ease: easings.luxe, delay: 0.05 + i * 0.1 },
-  }),
-};
+import Reveal from '../../components/ui/Reveal';
+import '../../animations/ambient.css';
 
 /**
  * Ecosystem chapter opening — centred and symmetrical, in contrast to the
@@ -54,38 +42,38 @@ export default function EcosystemIntro() {
           transform: 'translateX(-50%)',
           width: 'min(1200px, 120vw)',
           height: 'min(800px, 90vh)',
+          /* Painted rather than filtered — a 1200x800 blurred layer for a
+             diffuse chapter glow, in a section the reader scrolls into. */
           background:
-            'radial-gradient(50% 50% at 50% 50%, rgba(99,201,236,0.16) 0%, rgba(142,123,240,0.08) 46%, transparent 72%)',
-          filter: 'blur(20px)',
+            'radial-gradient(50% 50% at 50% 50%, rgba(99,201,236,0.16) 0%, rgba(142,123,240,0.075) 48%, transparent 74%)',
           pointerEvents: 'none',
         }}
       />
 
       <Container sx={{ position: 'relative', zIndex: 1 }}>
         <Stack spacing={{ xs: 3.5, md: 4.5 }} alignItems="center" sx={{ textAlign: 'center' }}>
-          <MotionBox
-            initial={{ opacity: 0, scale: 0.86 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1.4, ease: easings.luxe }}
+          <Reveal
+            variant="scale"
+            scale={0.86}
+            duration={1.4}
             sx={{ position: 'relative', width: { xs: 170, sm: 210, md: 250 } }}
           >
             <Box sx={{ position: 'absolute', inset: '-22%' }}>
               <ForgeRings />
             </Box>
-            <MotionBox
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+            <Box
+              className="ef-float"
+              style={{ '--float-to': '-10px', '--float-duration': '7s' }}
               sx={{
                 position: 'relative',
                 filter: 'drop-shadow(0 30px 56px rgba(0,0,0,0.7)) drop-shadow(0 0 46px rgba(99,201,236,0.28))',
               }}
             >
               <BrandArt asset="emblem" />
-            </MotionBox>
-          </MotionBox>
+            </Box>
+          </Reveal>
 
-          <MotionBox custom={0} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.05}>
             <Typography
               component="p"
               sx={{
@@ -97,9 +85,9 @@ export default function EcosystemIntro() {
             >
               {ecosystem.brandLine}
             </Typography>
-          </MotionBox>
+          </Reveal>
 
-          <MotionBox custom={1} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.15}>
             <Typography
               id="ecosystem-title"
               variant="h2"
@@ -110,9 +98,9 @@ export default function EcosystemIntro() {
                 {ecosystem.title}
               </GradientText>
             </Typography>
-          </MotionBox>
+          </Reveal>
 
-          <MotionBox custom={2} variants={rise} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <Reveal variant="blur" y={26} blur={9} duration={1} delay={0.25}>
             <Typography
               variant="h3"
               component="p"
@@ -125,7 +113,7 @@ export default function EcosystemIntro() {
               />
               {ecosystem.headline}
             </Typography>
-          </MotionBox>
+          </Reveal>
         </Stack>
       </Container>
     </Section>

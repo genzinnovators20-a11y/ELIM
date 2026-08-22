@@ -1,0 +1,189 @@
+/*
+ * Ambient and entrance motion that is not tied to the scroll position.
+ *
+ * These were `framer-motion` `animate` props with `repeat: Infinity`. Each one
+ * held a JavaScript animation open for the life of the page, ticking a motion
+ * value on every frame and writing a transform from the main thread — for
+ * movement that never responds to anything. As CSS keyframes the compositor
+ * owns them outright: the main thread writes the declaration once at mount and
+ * is never involved again.
+ *
+ * Everything here animates `transform` or `opacity` only, so no keyframe in this
+ * file can trigger layout or paint.
+ */
+
+/* ── Drift ──────────────────────────────────────────────────────────────
+   The slow vertical float that lifts the emblem and the coin off the rig. */
+@keyframes ef-float {
+  0%,
+  100% { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, var(--float-to, -10px), 0); }
+}
+
+.ef-float {
+  animation: ef-float var(--float-duration, 7s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+/* ── Breathe ────────────────────────────────────────────────────────────
+   The coin's slow pulse at the centre of the ecosystem wheel. */
+@keyframes ef-breathe {
+  0%,
+  100% { transform: scale3d(1, 1, 1); }
+  50%  { transform: scale3d(var(--breathe-to, 1.04), var(--breathe-to, 1.04), 1); }
+}
+
+.ef-breathe {
+  animation: ef-breathe var(--breathe-duration, 5.5s) ease-in-out infinite;
+}
+
+/* ── Specular sweep ─────────────────────────────────────────────────────
+   A raking highlight crossing the struck face of the coin. The long tail of
+   each cycle is idle, which `repeat-delay` used to express; in CSS the whole
+   cycle is one keyframe track and the idle share is written into the stops. */
+@keyframes ef-sheen {
+  0%    { transform: translate3d(-160%, 0, 0) skewX(-16deg); opacity: 0; }
+  5%    { transform: translate3d(-70%, 0, 0) skewX(-16deg);  opacity: 0.55; }
+  20%   { transform: translate3d(240%, 0, 0) skewX(-16deg);  opacity: 0.55; }
+  29.5% { transform: translate3d(340%, 0, 0) skewX(-16deg);  opacity: 0; }
+  100%  { transform: translate3d(340%, 0, 0) skewX(-16deg);  opacity: 0; }
+}
+
+.ef-sheen {
+  animation: ef-sheen 8.8s ease-in-out 2.1s infinite;
+}
+
+/* ── Scroll cue ─────────────────────────────────────────────────────────
+   The chevron nudging down beneath the masthead. */
+@keyframes ef-nudge {
+  0%,
+  100% { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, 6px, 0); }
+}
+
+.ef-nudge {
+  animation: ef-nudge 2.4s ease-in-out infinite;
+}
+
+/*
+ * ── Masthead entrance ──────────────────────────────────────────────────
+ *
+ * The one choreographed sequence on the site, and the only animation that runs
+ * before the reader has done anything.
+ *
+ * It is deliberately expressed as CSS keyframes rather than as a transition
+ * class toggled from JavaScript: a transition needs a first frame in the hidden
+ * state, a style flush, and a second frame in the visible state, which on a slow
+ * first paint is a real risk of the masthead being committed at `opacity: 0` and
+ * staying there for a frame. A keyframe animation starts from its own 0% the
+ * moment the element is painted, with no second style pass to miss.
+ *
+ * `backwards` fill matters for the same reason: an element whose cue has not
+ * come up yet holds the 0% frame instead of flashing at full opacity first.
+ */
+@keyframes ef-enter-rise {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ef-enter-head {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@keyframes ef-enter-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ef-enter-stage {
+  from { opacity: 0; transform: scale3d(0.94, 0.94, 1); }
+  to   { opacity: 1; transform: none; }
+}
+
+.ef-enter-rise,
+.ef-enter-head,
+.ef-enter-fade,
+.ef-enter-stage {
+  animation-duration: var(--enter-duration, 700ms);
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-delay: var(--enter-delay, 0ms);
+  animation-fill-mode: backwards;
+}
+
+.ef-enter-rise  { animation-name: ef-enter-rise; }
+.ef-enter-head  { animation-name: ef-enter-head; --enter-duration: 950ms; }
+.ef-enter-fade  { animation-name: ef-enter-fade; --enter-duration: 900ms; }
+.ef-enter-stage { animation-name: ef-enter-stage; --enter-duration: 1250ms; }
+
+/*
+ * Reduced motion.
+ *
+ * Presence only. The entrance keeps a short fade so the masthead does not simply
+ * appear mid-paint, but nothing moves, scales or blurs, and every ambient loop
+ * stops outright rather than being slowed down — a slow infinite drift is still
+ * an infinite drift.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ef-float,
+  .ef-breathe,
+  .ef-sheen,
+  .ef-nudge {
+    animation: none;
+  }
+
+  .ef-enter-rise,
+  .ef-enter-head,
+  .ef-enter-fade,
+  .ef-enter-stage {
+    animation-name: ef-enter-fade;
+    animation-duration: 300ms;
+    animation-delay: 0ms;
+  }
+}
+
+/*
+ * ── Flow pulse ─────────────────────────────────────────────────────────
+ *
+ * The travelling dash that runs along the ecosystem conduits and the reward
+ * distribution channels. Every path is authored with `pathLength="1"`, so the
+ * dash pattern and the offset are both expressed as a fraction of the path and
+ * one keyframe serves conduits of any length.
+ *
+ * This is the one loop on the site that cannot reach the compositor:
+ * `stroke-dashoffset` is a paint property, so each of the seven paths repaints
+ * its own bounds every frame it is on screen. That is affordable because it is
+ * bounded — `content-visibility: auto` on the enclosing sections means a
+ * conduit that is not on screen is not painted, and therefore not animated,
+ * which is most of the time on a 22,000px page.
+ */
+@keyframes ef-flow {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.ef-flow {
+  stroke-dashoffset: 1;
+  animation: ef-flow var(--flow-duration, 3.4s) linear infinite;
+  animation-delay: var(--flow-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-flow { animation: none; opacity: 0; }
+}
+
+/* ── Pulse ──────────────────────────────────────────────────────────────
+   The live indicator on the roadmap's current phase. */
+@keyframes ef-pulse {
+  0%,
+  100% { opacity: 1; }
+  50%  { opacity: 0.25; }
+}
+
+.ef-pulse {
+  animation: ef-pulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-pulse { animation: none; }
+}

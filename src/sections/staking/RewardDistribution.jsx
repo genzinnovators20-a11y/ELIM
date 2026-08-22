@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import { Grid, Stack } from '@/components/ui/layout';
 import Typography from '@mui/material/Typography';
-import { motion, useReducedMotion } from 'framer-motion';
 import Section from '../../components/ui/Section';
 import SectionHeading from '../../components/ui/SectionHeading';
 import Reveal, { RevealGroup, RevealItem } from '../../components/ui/Reveal';
@@ -12,9 +11,9 @@ import ForgeRings from '../../components/visuals/ForgeRings';
 import { rewardDistribution } from '../../constants/content';
 import { fontFamilies } from '../../theme/typography';
 import { alphaOf } from '../../utils/accents';
-import { easings, layout } from '../../theme/tokens';
-
-const MotionPath = motion.path;
+import { layout } from '../../theme/tokens';
+import useReveal from '../../hooks/useReveal';
+import '../../animations/ambient.css';
 
 const CHANNELS = [
   { x: 16.66, color: 'gold' },
@@ -24,7 +23,6 @@ const CHANNELS = [
 
 /** Distribution conduits from the ELM node down to each mechanism column. */
 function FlowConnectors() {
-  const reduced = useReducedMotion();
 
   return (
     <Box
@@ -56,22 +54,22 @@ function FlowConnectors() {
           return (
             <g key={ch.x}>
               <path d={d} fill="none" stroke={`url(#flow-${ch.color})`} strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
-              {!reduced && (
-                <MotionPath
-                  d={d}
-                  fill="none"
-                  stroke={alphaOf(ch.color, 1)}
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  vectorEffect="non-scaling-stroke"
-                  pathLength={1}
-                  strokeDasharray="0.08 0.92"
-                  initial={{ strokeDashoffset: 1 }}
-                  animate={{ strokeDashoffset: 0 }}
-                  transition={{ duration: 2.6, repeat: Infinity, ease: 'linear', delay: i * 0.55 }}
-                  style={{ filter: `drop-shadow(0 0 6px ${alphaOf(ch.color, 0.9)})` }}
-                />
-              )}
+              <path
+                className="ef-flow"
+                d={d}
+                fill="none"
+                stroke={alphaOf(ch.color, 1)}
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+                pathLength={1}
+                strokeDasharray="0.08 0.92"
+                style={{
+                  '--flow-duration': '2.6s',
+                  '--flow-delay': `${i * 0.55}s`,
+                  filter: `drop-shadow(0 0 6px ${alphaOf(ch.color, 0.9)})`,
+                }}
+              />
             </g>
           );
         })}
@@ -86,7 +84,7 @@ function FlowConnectors() {
  * mechanisms — the diagram carries the structure, the copy carries the detail.
  */
 export default function RewardDistribution() {
-  const reduced = useReducedMotion();
+  const revealRef = useReveal();
 
   return (
     <Section id="rewards" tone="gold">
@@ -121,15 +119,14 @@ export default function RewardDistribution() {
               <ForgeRings laserColor="rgba(212,175,55,0.85)" />
             </Box>
             <Box
-              component={motion.div}
-              animate={reduced ? undefined : { y: [0, -8, 0] }}
-              transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="ef-float"
+              style={{ '--float-to': '-8px', '--float-duration': '6.5s' }}
               sx={{
                 position: 'relative',
                 filter: 'drop-shadow(0 24px 44px rgba(0,0,0,0.7)) drop-shadow(0 0 40px rgba(212,175,55,0.32))',
               }}
             >
-              <BrandArt asset="coin" />
+              <BrandArt asset="coinSm" />
             </Box>
           </Box>
         </Box>
@@ -182,11 +179,14 @@ export default function RewardDistribution() {
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ pt: 0.5 }}>
                     <IconTile name={item.icon} accent={item.accent} size="md" />
                     <Typography
-                      component={motion.span}
-                      initial={{ opacity: 0, y: 8 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.7, ease: easings.luxe, delay: 0.1 + i * 0.08 }}
+                      component="span"
+                      ref={revealRef}
+                      data-reveal="fadeUp"
+                      style={{
+                        '--rv-y': '8px',
+                        '--rv-duration': '700ms',
+                        '--rv-delay': `${Math.round((0.1 + i * 0.08) * 1000)}ms`,
+                      }}
                       sx={{
                         fontFamily: fontFamilies.serif,
                         fontSize: '2.75rem',
